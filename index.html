@@ -727,7 +727,7 @@
     {id:"grooming", name:"Груминг"},
     {id:"store",    name:"Магазин"}
   ];
-  // Топик, куда уйдёт задача: для печати и ювелирки — по типу
+  // Топик, куда уйдёт задача: ювелирка — свой топик, остальное — по направлению
   const TOPIC_BY_TYPE = {jewelry:"Ювелирка"};
   const SALONS = [
     {id:"ramenki", name:"Раменки"},
@@ -899,7 +899,7 @@
   /* ------------------------------------------- */
 
   const tg = window.Telegram && window.Telegram.WebApp;
-  const inTelegram = !!(tg && tg.initData);
+  const inTelegram = !!(tg && tg.platform && tg.platform !== "unknown");
   const $ = id => document.getElementById(id);
   const MULTI = {out:1, fmt:1, aud:1, place:1, must:1, change:1};
   const state = {type:null, kind:null, owner:"me", pbudget:null, img:null, out:[], publisher:null, dir:null, salon:null, change:[], fmt:[], biz:null, aud:[], cta:null,
@@ -1148,7 +1148,7 @@
     p.owner = state.owner === "other" ? v("owner-name") : "author";
     if (t !== "jewelry"){ p.kind = k; p.dir = state.dir; p.nope = v("nope"); p.files = $("files").checked; p.out = state.out; }
     if (t === "social" || t === "site"){ p.publisher = state.publisher; p.publisherName = v("publisher-name"); }
-    else p.dir = "store";
+    if (t === "jewelry") p.dir = "store";
     if (t !== "jewelry" && k === "edit"){
       Object.assign(p, {src:v("src"), srcLater:$("src-later").checked, change:state.change, ctext:v("change-text")});
     }
