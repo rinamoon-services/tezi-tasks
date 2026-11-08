@@ -1,0 +1,1309 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>TEZI — новая задача</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Arsenal:wght@400;700&family=Wix+Madefor+Display:wght@500;600&family=Wix+Madefor+Text:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Токены TEZI — концепт сайта */
+  :root{
+    --color-text-primary:#141312;
+    --color-text-secondary:#1413127a;
+    --color-text-tertiary:#14131252;
+    --color-text-invert-primary:#fdfdfd;
+    --color-background-primary:#fdfdfd;
+    --color-background-warm:#fff0dc;
+    --color-grey-primary:#f1efed;
+    --color-grey-secondary:#e7e6e3;
+    --color-grey-inactive:#cfccc9;
+    --color-border-default:#e7e6e3;
+    --color-border-subtle:#1413121f;
+    --color-border-strong:#141312;
+    --color-primary-default:#6fa1ff;
+    --color-primary-light:#adcaff;
+    --color-semantic-error-default:#f46982;
+    --color-semantic-error-surface:#ffd4e1;
+    --color-overlay-backdrop-default:#1413127a;
+    --radius-min:2px;
+    --radius-standard:6px;
+    --radius-full:999px;
+    --stroke-1:1px;
+    --font-hero:"Arsenal", Georgia, serif;
+    --font-title:"Arsenal", Georgia, serif;
+    --font-display:"Wix Madefor Display", system-ui, sans-serif;
+    --font-text:"Wix Madefor Text", system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  html,body{margin:0;background:var(--color-background-primary);color:var(--color-text-primary)}
+  body{font:400 16px/24px var(--font-text);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:520px;margin:0 auto;padding:0 14px calc(130px + env(safe-area-inset-bottom))}
+
+  /* Герой — как «ВСЁ ДЛЯ ПСЁ КИСЁ» */
+  .hero{margin:0 -14px;padding:16px 14px 28px;background:linear-gradient(180deg,var(--color-background-warm) 0%,var(--color-background-primary) 100%);position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;right:-60px;top:70px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fdfdfd 0%,var(--color-primary-light) 55%,var(--color-primary-default) 100%);opacity:.55;filter:blur(2px)}
+  .brand{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;font:700 16px/16px var(--font-display);letter-spacing:.04em}
+  .brand span{font:600 10px/12px var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-secondary)}
+  h1{position:relative;z-index:1;font:400 76px/.82 var(--font-hero);letter-spacing:-.02em;text-transform:uppercase;margin:44px 0 0;display:flex;flex-direction:column}
+  h1 .r{align-self:flex-end}
+  .lead{position:relative;z-index:1;font:400 14px/20px var(--font-text);margin:20px 0 0;max-width:240px}
+
+  /* Шаги — как сегмент-контрол «грумер / топ-грумер» */
+  .steps{position:sticky;top:0;z-index:5;margin:0 -14px;padding:10px 14px;background:var(--color-background-primary);border-bottom:var(--stroke-1) solid var(--color-border-subtle)}
+  .steps-track{display:flex;gap:2px;padding:3px;background:var(--color-grey-secondary);border-radius:var(--radius-full)}
+  .steps a{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;height:32px;border-radius:var(--radius-full);font:600 10px/12px var(--font-display);letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-primary);text-decoration:none;white-space:nowrap;transition:background .2s,box-shadow .2s}
+  .steps a.active{background:var(--color-background-primary);box-shadow:0 1px 3px #14131214}
+  .steps a .ok{display:none;width:14px;height:14px;border-radius:50%;background:var(--color-border-strong);color:var(--color-text-invert-primary);font-size:9px;line-height:14px;text-align:center}
+  .steps a.done .ok{display:inline-block}
+
+  /* Группа — как пункт прайса «СОБИРАТЬ КОМПЛИМЕНТЫ» */
+  .group{padding-top:12px;scroll-margin-top:60px}
+  .group-head{display:flex;align-items:center;gap:12px;padding:28px 0 4px}
+  .num{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:500 18px/1 var(--font-hero);color:var(--color-text-primary);background:radial-gradient(circle at 35% 30%,#fdfdfd 0%,var(--color-primary-light) 70%,var(--color-primary-default) 100%)}
+  .group-title{font:400 44px/.9 var(--font-hero);letter-spacing:-.01em;text-transform:uppercase;margin:0}
+  .step{display:none}
+  .group-head + .card{border-top:0}
+
+  /* Поле */
+  .card{padding:22px 0;border-top:var(--stroke-1) solid var(--color-border-default)}
+  .label{font:600 16px/20px var(--font-display);letter-spacing:-.01em;margin:0 0 4px;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+  .label .req{color:var(--color-primary-default)}
+  .label .multi{font:600 10px/12px var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-secondary);margin-left:auto}
+  .hint{font:400 12px/16px var(--font-text);color:var(--color-text-secondary);margin:0 0 12px}
+  .label + .chips,.label + input,.label + textarea{margin-top:12px}
+  .error{display:none;font:600 10px/12px var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--color-semantic-error-default);margin-top:10px}
+  .card.has-error .error{display:block}
+  .card.has-error .label{color:var(--color-semantic-error-default)}
+  .card.has-error input,.card.has-error textarea{border-color:var(--color-semantic-error-default)}
+  .sub{margin-top:22px;padding-top:18px;border-top:var(--stroke-1) dashed var(--color-border-default)}
+
+  /* Чипсы — серые пилюли, выбранная чёрная */
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{appearance:none;height:36px;padding:0 14px;border:0;background:var(--color-grey-primary);color:var(--color-text-primary);font:600 11px/12px var(--font-display);letter-spacing:.06em;text-transform:uppercase;border-radius:var(--radius-full);cursor:pointer;transition:background .15s,color .15s,transform .1s}
+  .chip:active{transform:scale(.97)}
+  .chip[aria-pressed="true"]{background:var(--color-border-strong);color:var(--color-text-invert-primary)}
+  .chip .em{display:none}
+  .card.has-error .chip{box-shadow:inset 0 0 0 1px var(--color-semantic-error-surface)}
+
+  /* Поля ввода — как селект «ДО 30 СМ» */
+  input[type=text],input[type=date],textarea{width:100%;min-height:48px;border:var(--stroke-1) solid var(--color-border-default);background:var(--color-background-primary);border-radius:var(--radius-standard);padding:12px 14px;font:400 16px/24px var(--font-text);color:var(--color-text-primary);outline:none;transition:border-color .15s;-webkit-appearance:none}
+  textarea{resize:none;min-height:104px;display:block}
+  textarea.short{min-height:76px}
+  input::placeholder,textarea::placeholder{color:var(--color-text-tertiary)}
+  input:focus,textarea:focus{border-color:var(--color-border-strong)}
+  .counter{text-align:right;font:500 10px/14px var(--font-text);color:var(--color-text-tertiary);margin:4px 2px 0}
+  .reveal{display:none;margin-top:10px}
+  .reveal.show{display:block}
+  .reveal .hint{margin:8px 2px 0}
+
+  /* Переключатель */
+  .toggle{display:flex;align-items:center;gap:12px;cursor:pointer;margin-top:16px;user-select:none}
+  .toggle input{position:absolute;opacity:0;pointer-events:none}
+  .switch{width:40px;height:24px;border-radius:var(--radius-full);background:var(--color-grey-inactive);position:relative;flex:none;transition:background .2s}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--color-background-primary);transition:transform .2s}
+  .toggle input:checked + .switch{background:var(--color-border-strong)}
+  .toggle input:checked + .switch::after{transform:translateX(16px)}
+  .toggle-text{font:500 14px/20px var(--font-display)}
+  .toggle-text small{display:block;font:400 12px/16px var(--font-text);color:var(--color-text-secondary)}
+
+  /* Подробнее — как «98 услуг в одном комплексе ⌄» */
+  .more{margin-top:8px;border-top:var(--stroke-1) solid var(--color-border-strong)}
+  .more-btn{width:100%;appearance:none;border:0;background:transparent;padding:20px 0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;color:var(--color-text-primary)}
+  .more-btn > span:first-child{font:400 32px/.9 var(--font-hero);text-transform:uppercase;text-align:left}
+  .more-btn small{display:none}
+  .more-btn .plus{display:flex;align-items:center;gap:8px;font:600 10px/12px var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-secondary)}
+  .more-btn .plus::after{content:"↓";width:32px;height:32px;border-radius:50%;background:var(--color-background-warm);color:var(--color-text-primary);display:grid;place-items:center;font-size:14px;transition:transform .2s}
+  .more.open .more-btn .plus::after{transform:rotate(180deg)}
+  .more-body{display:none}
+  .more.open .more-body{display:block}
+
+  /* Нижняя кнопка — чёрная, подпись капсом под ней */
+  .bar{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(10px + env(safe-area-inset-bottom));background:var(--color-background-primary);border-top:var(--stroke-1) solid var(--color-border-subtle);z-index:6}
+  .bar-inner{max-width:520px;margin:0 auto;display:flex;flex-direction:column-reverse}
+  .btn{width:100%;appearance:none;height:48px;border-radius:var(--radius-min);padding:0 24px;font:600 12px/12px var(--font-display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:opacity .15s,transform .1s}
+  .btn:active{transform:scale(.99)}
+  .btn-primary{background:var(--color-border-strong);color:var(--color-text-invert-primary);border:0}
+  .btn-ghost{background:var(--color-background-primary);color:var(--color-text-primary);border:var(--stroke-1) solid var(--color-border-default)}
+  .progress{font:600 9px/12px var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-primary);text-align:center;margin-top:8px}
+
+  /* Шторка — как сводка комплекса */
+  .backdrop{position:fixed;inset:0;background:var(--color-overlay-backdrop-default);opacity:0;pointer-events:none;transition:opacity .25s;z-index:10}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:11;background:var(--color-background-primary);border-radius:16px 16px 0 0;max-height:90vh;overflow:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+  .sheet.open{transform:none}
+  .backdrop.open{opacity:1;pointer-events:auto}
+  .sheet-inner{max-width:520px;margin:0 auto;padding:10px 14px calc(16px + env(safe-area-inset-bottom))}
+  .grabber{width:36px;height:4px;border-radius:4px;background:var(--color-border-default);margin:0 auto 20px}
+  .sheet h2{font:400 56px/.85 var(--font-hero);text-transform:uppercase;letter-spacing:-.01em;margin:0 0 18px}
+  .ticket{margin-bottom:18px}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+  .tag{font:600 10px/12px var(--font-display);letter-spacing:.08em;text-transform:uppercase;background:var(--color-background-warm);padding:8px 12px;border-radius:var(--radius-full)}
+  .tag.hot{background:var(--color-semantic-error-surface)}
+  .ticket-title{font:400 30px/1 var(--font-title);margin:0 0 10px}
+  .ticket-msg{font:400 16px/22px var(--font-text);margin:0 0 6px}
+  .row{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:10px 0;border-top:var(--stroke-1) solid var(--color-border-default)}
+  .row:first-child{margin-top:12px;border-top-color:var(--color-border-strong)}
+  .row dt{font:600 10px/20px var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-secondary)}
+  .row dd{margin:0;font:400 14px/20px var(--font-text);white-space:pre-wrap;word-break:break-word}
+  .sheet .actions{display:grid;gap:8px}
+  .note{font:600 9px/12px var(--font-display);letter-spacing:.08em;text-transform:uppercase;text-align:center;margin:10px 0 0}
+
+  .toast{position:fixed;left:50%;top:16px;transform:translate(-50%,-140%);background:var(--color-border-strong);color:var(--color-text-invert-primary);padding:12px 18px;border-radius:var(--radius-min);font:600 11px/16px var(--font-display);letter-spacing:.06em;text-transform:uppercase;z-index:20;transition:transform .3s;max-width:calc(100% - 28px);text-align:center}
+  .toast.show{transform:translate(-50%,0)}
+
+  /* ===== Бабл-слой: мягкие карточки v2 поверх структуры v4 ===== */
+  :root{--radius-bubble:28px;--radius-field:20px}
+  h1{font:400 64px/.88 var(--font-title);letter-spacing:-.03em;text-transform:none;margin-top:40px}
+  .group-head{padding:30px 2px 14px}
+  .group-title{font:400 36px/1 var(--font-title);letter-spacing:-.02em;text-transform:none}
+  .num{font:600 14px/1 var(--font-display)}
+  .card{background:var(--color-grey-primary);border-radius:var(--radius-bubble);padding:20px 16px;border-top:0;margin-bottom:10px;transition:box-shadow .2s}
+  .card.has-error{box-shadow:inset 0 0 0 1.6px var(--color-semantic-error-default)}
+  .card.has-error .chip{box-shadow:none}
+  .chip{background:var(--color-background-primary);height:38px;padding:0 15px;font:500 14px/16px var(--font-text);letter-spacing:0;text-transform:none}
+  input[type=text],input[type=date],textarea{border-color:transparent;border-radius:var(--radius-field)}
+  input:focus,textarea:focus{border-color:var(--color-primary-default)}
+  .sub{border-top:var(--stroke-1) dashed var(--color-grey-inactive)}
+  .label .multi{font:400 12px/14px var(--font-text);letter-spacing:0;text-transform:none}
+  .error{font:500 12px/16px var(--font-text);letter-spacing:0;text-transform:none}
+  .more{border-top:0;margin-top:14px}
+  .more-btn{background:var(--color-grey-primary);border-radius:var(--radius-bubble);padding:18px 16px 18px 20px}
+  .more-btn > span:first-child{font:400 28px/1 var(--font-title);text-transform:none}
+  .more-btn .plus{font:400 12px/14px var(--font-text);letter-spacing:0;text-transform:none}
+  .more-btn .plus::after{background:var(--color-background-primary)}
+  .more-body{margin-top:10px}
+  .btn{border-radius:var(--radius-full);height:52px}
+  .sheet{border-radius:var(--radius-bubble) var(--radius-bubble) 0 0}
+  .sheet h2{font:400 40px/1 var(--font-title);text-transform:none;letter-spacing:-.02em}
+  .ticket{background:var(--color-grey-primary);border-radius:var(--radius-field);padding:18px 16px}
+  .tag{background:var(--color-background-primary)}
+  .tag.hot{background:var(--color-semantic-error-default);color:var(--color-text-invert-primary)}
+  .ticket-title{font:600 18px/24px var(--font-display);letter-spacing:-.01em}
+  .row{border-top-color:#1413121a}
+  .row:first-child{border-top-color:#1413121a}
+  .hero::before{content:"";position:absolute;left:-40px;bottom:-70px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fdfdfd 0%,var(--color-primary-light) 60%,var(--color-primary-default) 100%);opacity:.35}
+
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .card > input + .pair{margin-top:8px}
+
+  .sublabel{font:600 10px/12px var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-secondary);margin:14px 2px 8px}
+  .medal-title{font:400 22px/1 var(--font-title);margin:18px 0 0}
+  .card .label + .medal-title{margin-top:8px}
+
+  /* Иконки TEZI */
+  .i{display:block;flex:none;width:auto;height:16px}
+  .chip.has-icon{display:inline-flex;align-items:center;gap:7px;padding-left:11px}
+  .chip .soc{height:18px}
+  .soc .bg{fill:currentColor}
+  .soc .fg{stroke:var(--color-background-primary);stroke-width:1.2}
+  .chip[aria-pressed="true"] .soc .fg{stroke:var(--color-border-strong)}
+  .chips.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .chips.tiles .chip{height:auto;min-height:96px;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:16px;padding:16px;border-radius:20px;text-align:left;font:600 14px/18px var(--font-display);white-space:normal}
+  .chips.tiles .chip .i{height:22px}
+  .brand .logo{display:block;height:20px;width:auto}
+  .brand #logo,.brand #logo2{color:var(--color-text-primary)}
+  .group-head{position:relative}
+  .group-head .ill{margin-left:auto;width:56px;height:56px;object-fit:contain;transform:rotate(-8deg)}
+  .more-btn .plus::after{display:none}
+  .more-btn .chev{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--color-background-primary);transition:transform .2s}
+  .more-btn .chev .i{height:7px}
+  .more.open .more-btn .chev{transform:rotate(180deg)}
+
+  .error{display:none;align-items:center;gap:6px}
+  .card.has-error .error{display:flex}
+  .error .i{height:14px}
+  .sent{position:fixed;inset:0;z-index:30;background:var(--color-background-primary);display:none;align-items:center;justify-content:center;padding:24px}
+  .sent.show{display:flex}
+  .sent-inner{position:relative;max-width:320px;text-align:center;display:flex;flex-direction:column;align-items:center}
+  .sent-mark{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:var(--color-background-primary);color:var(--color-text-primary);margin-bottom:20px}
+  .sent-mark svg{width:30px;height:30px}
+  .sent-title{font:400 40px/1 var(--font-title);letter-spacing:-.02em;margin:0 0 12px}
+  .sent-text{font:400 14px/20px var(--font-text);color:var(--color-text-secondary);margin:0 0 24px}
+  .tag{background:var(--color-background-primary)}
+
+  .designs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .design{appearance:none;border:var(--stroke-1) solid transparent;background:var(--color-background-primary);border-radius:16px;padding:8px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font:500 11px/14px var(--font-text);color:var(--color-text-primary);text-align:center;transition:border-color .15s,transform .1s}
+  .design:active{transform:scale(.97)}
+  .design[aria-pressed="true"]{border-color:var(--color-border-strong);box-shadow:inset 0 0 0 .6px var(--color-border-strong)}
+  .design-img{width:72px;height:72px;display:grid;place-items:center}
+  .design-img.legacy{border-radius:50%;background:#d9c39d;overflow:hidden}
+  .design-img img{width:100%;height:100%;object-fit:contain}
+  .design-none{font-size:20px;color:var(--color-text-tertiary)}
+  .card.has-error .design{border-color:var(--color-semantic-error-surface)}
+
+  /* устойчивость при переносе в Figma */
+  .brand .logo{width:50px;height:20px}
+  .chips.tiles{display:flex;flex-wrap:wrap}
+  .chips.tiles .chip{width:calc(50% - 4px)}
+  .designs{display:flex;flex-wrap:wrap}
+  .design{width:calc((100% - 16px) / 3)}
+
+  input.own{margin-top:10px;min-height:44px;font-size:14px;line-height:20px;background:transparent;border:var(--stroke-1) dashed var(--color-grey-inactive)}
+  input.own:focus{background:var(--color-background-primary);border-style:solid}
+  input.own:not(:placeholder-shown){background:var(--color-background-primary);border-style:solid;border-color:var(--color-border-strong)}
+
+  .chip.has-icon .i{width:16px;height:16px}
+  .chip.has-icon .soc{width:18px;height:18px}
+  .chips.tiles .chip .i{width:22px;height:22px}
+
+  /* ===== v13 — эталон: первый экран v12 после правок Рины ===== */
+  .hero{background:linear-gradient(180deg,var(--color-primary-light) 0%,var(--color-background-primary) 100%);border-radius:16px 16px 0 0;padding:16px 14px 28px}
+  .hero::before,.hero::after{display:none}
+  h1{display:block;font:400 64px/56px var(--font-title);letter-spacing:-.03em;text-transform:none;margin:40px 0 0;max-width:330px}
+  .lead{margin-top:20px}
+  .label{gap:6px}
+  .label .req{margin-left:-5px}
+  .group-head{align-items:center}
+  .group-title{line-height:40px;padding-bottom:4px}
+
+  /* v14: сплошные кружки, без иллюстраций у заголовков */
+  .num{background:var(--color-primary-default)}
+  .group-head .ill{display:none}
+  .toggle-text .toggle-hint{display:block;font:400 12px/16px var(--font-text);color:var(--color-text-secondary)}
+  .more-btn .chev .i{width:14px;height:7px}
+
+  /* v15 */
+  .pair input[type=text], #series-link{line-height:16px}
+  .sent .sent-hero{position:absolute;left:0;right:0;top:0;height:296px;border-radius:16px 16px 0 0;background:linear-gradient(180deg,var(--color-primary-light) 0%,var(--color-background-primary) 100%);padding:16px 14px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+
+  /* v16: табы шагов — по ширине текста, свободное место поровну между ними */
+  .steps-track{justify-content:space-between;gap:0}
+  .steps a{flex:0 0 auto;padding:0 10px;white-space:nowrap}
+
+  /* v17: плитки дизайнов одной высоты (по самой высокой) */
+  .designs{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:8px}
+  .designs .design{width:auto;height:100%;justify-content:flex-start}
+  #jrelabel-text{margin-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="brand"><span id="logo"></span><span id="hello">задачи дизайнеру</span></div>
+    <h1>новая задача на графдиз</h1>
+    <p class="lead">Тыкай кнопки — писать почти ничего не придётся. Дизайнер получит понятное ТЗ.</p>
+  </div>
+  <nav class="steps"><div class="steps-track" id="steps"></div></nav>
+
+  <form id="form" novalidate>
+
+    <!-- ===== 01 ЗАДАЧА — всем ===== -->
+    <div class="group" id="g-task" data-short="задача" data-req="type,dir">
+      <div class="group-head"><span class="num"></span><p class="group-title">задача</p></div>
+
+      <section class="card" data-req="type">
+        <p class="label">Что нужно <span class="req">*</span></p>
+        <div class="chips tiles" id="type"></div>
+        <p class="error">Выбери, что нужно</p>
+      </section>
+
+      <section class="card" data-req="kind" data-types="social,site,print">
+        <p class="label">Новое или правка <span class="req">*</span></p>
+        <div class="chips big" id="kind"></div>
+        <p class="error">Выбери вариант</p>
+      </section>
+
+      <section class="card" data-req="owner" data-types="social,site,print,jewelry">
+        <p class="label">Чья задача</p>
+        <div class="chips" id="owner"></div>
+        <input type="text" id="owner-name" maxlength="60" placeholder="Кто согласует результат, например: Мария" style="margin-top:12px;display:none">
+        <p class="hint" style="margin:10px 2px 0">Результат согласует тот, чья задача</p>
+        <p class="error">Напиши, кто согласует</p>
+      </section>
+
+      <section class="card" data-req="dir" data-types="social,site,print">
+        <p class="label">Направление <span class="req">*</span></p>
+        <p class="hint">Направление бренда</p>
+        <div class="chips big" id="dir"></div>
+        <p class="error">Выбери направление</p>
+      </section>
+
+      <section class="card" data-types="social,site,print,jewelry">
+        <p class="label">Клуб</p>
+        <div class="chips" id="salon"></div>
+      </section>
+    </div>
+
+    <!-- ===== ПРАВКА / ПО АНАЛОГИИ ===== -->
+    <div class="group" id="g-edit" data-types="edit" data-short="правка">
+      <div class="group-head"><span class="num"></span><p class="group-title">правка</p></div>
+
+      <section class="card" data-req="src">
+        <p class="label">Исходник <span class="req">*</span></p>
+        <p class="hint">Ссылка на макет в Figma или на сообщение в чате. Чтобы скопировать ссылку, сверни форму свайпом вниз — всё заполненное сохранится</p>
+        <input type="text" id="src" maxlength="200" placeholder="https://…">
+        <label class="toggle"><input type="checkbox" id="src-later"><span class="switch"></span><span class="toggle-text">Пришлю в чате<span class="toggle-hint">Ответом на карточку задачи после отправки</span></span></label>
+        <p class="error">Без исходника дизайнер не найдёт макет</p>
+      </section>
+
+      <section class="card" data-req="change">
+        <p class="label">Что меняем <span class="req">*</span> <span class="multi">можно несколько</span></p>
+        <div class="chips" id="change"></div>
+        <textarea id="change-text" class="short" maxlength="400" placeholder="Например: дата 26.11 вместо 28.10, остальное без изменений" style="margin-top:12px"></textarea>
+        <p class="error">Отметь, что меняем, или напиши</p>
+      </section>
+    </div>
+
+    <!-- ===== НОВЫЙ МАКЕТ: ЧТО ===== -->
+    <div class="group" id="g-what" data-types="social-new,site-new" data-short="что">
+      <div class="group-head"><span class="num"></span><p class="group-title">что делаем</p></div>
+
+      <section class="card" data-req="fmt">
+        <p class="label">Что нужно <span class="req">*</span> <span class="multi">можно несколько</span></p>
+        <p class="hint" id="fmt-hint">Например, пост + сторис к одному событию</p>
+        <div class="chips" id="fmt"></div>
+        <p class="error">Выбери хотя бы один формат</p>
+      </section>
+
+      <section class="card" data-req="title">
+        <p class="label">Коротко о задаче <span class="req">*</span></p>
+        <p class="hint">Повод — как назвала бы задачу в чате</p>
+        <input type="text" id="title" maxlength="70" placeholder="Мастер-класс по шпицам 15.11">
+        <p class="error">Напиши пару слов о задаче</p>
+      </section>
+
+      <section class="card">
+        <label class="toggle" style="margin-top:0">
+          <input type="checkbox" id="series">
+          <span class="switch"></span>
+          <span class="toggle-text">Часть серии или кампании<small>Например: афиша, карусель и сторис к одному МК — дизайнер сделает их в одном стиле</small></span>
+        </label>
+        <input type="text" id="series-link" maxlength="200" placeholder="Ссылка на первую задачу серии или название кампании" style="margin-top:12px;display:none">
+      </section>
+
+      <section class="card" id="event" data-req="event">
+        <p class="label">Мастер-класс <span class="req">*</span></p>
+        <p class="hint">Для афиш и каруселей школы</p>
+        <input type="text" id="ev-name" maxlength="80" placeholder="Название, например «Бурый мишка»">
+        <div class="pair">
+          <input type="text" id="ev-breed" maxlength="40" placeholder="Порода">
+          <input type="text" id="ev-master" maxlength="40" placeholder="Мастер">
+        </div>
+        <p class="sublabel">Грейд мастера</p>
+        <div class="chips" id="evgrade"></div>
+        <div class="pair">
+          <input type="date" id="ev-date">
+          <input type="text" id="ev-time" maxlength="12" placeholder="Время, 11:00">
+        </div>
+        <p class="error">Нужны название, дата и грейд мастера</p>
+      </section>
+    </div>
+
+    <!-- ===== НОВЫЙ МАКЕТ: ЗАЧЕМ ===== -->
+    <div class="group" id="g-why" data-types="social-new,site-new" data-short="зачем">
+      <div class="group-head"><span class="num"></span><p class="group-title">зачем</p></div>
+
+      <section class="card" data-req="biz">
+        <p class="label">Зачем бизнесу <span class="req">*</span></p>
+        <p class="hint">По этому Мария расставляет приоритеты</p>
+        <div class="chips" id="biz"></div>
+        <input type="text" class="own" id="biz-own" maxlength="200" placeholder="Свой вариант: какого эффекта ждёшь. Например: хотим, чтобы о нас узнали в районе нового клуба">
+        <p class="error">Выбери или напиши, зачем это бизнесу</p>
+      </section>
+
+      <section class="card" data-req="aud">
+        <p class="label">Для кого <span class="req">*</span> <span class="multi">можно несколько</span></p>
+        <div class="chips" id="aud"></div>
+        <input type="text" class="own" id="aud-own" maxlength="200" placeholder="Свой вариант. Например: владельцы шпицев, которые ещё не были у нас">
+        <p class="error">Выбери или напиши, кто это увидит</p>
+      </section>
+
+      <section class="card" data-req="cta">
+        <p class="label">Что человек должен сделать <span class="req">*</span></p>
+        <p class="hint">От этого зависит, что на макете будет главным</p>
+        <div class="chips" id="cta"></div>
+        <input type="text" class="own" id="cta-own" maxlength="200" placeholder="Свой вариант. Например: подписаться на канал школы">
+        <p class="error">Выбери или напиши действие</p>
+      </section>
+
+      <section class="card" data-req="msg">
+        <p class="label">Главная мысль <span class="req">*</span></p>
+        <p class="hint">Что человек должен запомнить, если увидит макет на 2 секунды</p>
+        <textarea id="msg" class="short" maxlength="120" placeholder="За 1 день научим стричь шпица"></textarea>
+        <p class="error">Сформулируй одну главную мысль</p>
+      </section>
+    </div>
+
+    <!-- ===== ПЕЧАТЬ ===== -->
+    <div class="group" id="g-print" data-types="print-new" data-short="печать">
+      <div class="group-head"><span class="num"></span><p class="group-title">печать</p></div>
+
+      <section class="card" data-req="pitem">
+        <p class="label">Что печатаем <span class="req">*</span></p>
+        <div class="chips" id="pitem"></div>
+        <p class="error">Выбери, что печатаем</p>
+      </section>
+
+      <section class="card" data-req="psize">
+        <p class="label">Размер <span class="req">*</span></p>
+        <div class="chips" id="psizemode"></div>
+        <input type="text" id="psize" maxlength="60" placeholder="В мм, например 105×148" style="margin-top:12px;display:none">
+        <p class="error">Нажми «Не знаю» или укажи размер</p>
+      </section>
+
+      <section class="card" data-req="pbudget">
+        <p class="label">Тираж и бюджет <span class="req">*</span></p>
+        <p class="hint">Печать оплачивает Мария, поэтому тираж и бюджет решает она</p>
+        <div class="chips" id="pbudget"></div>
+        <p class="error">Отметь, согласовано ли с Марией</p>
+      </section>
+
+      <section class="card">
+        <p class="label">Материал</p>
+        <div class="chips" id="pmat"></div>
+        <div class="pair" style="margin-top:12px">
+          <input type="text" id="pqty" maxlength="20" placeholder="Тираж">
+          <span></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="label">Кто печатает</p>
+        <div class="chips" id="pwho"></div>
+        <input type="text" id="preq" maxlength="200" placeholder="Требования типографии: вылеты, CMYK, формат файла" style="margin-top:12px;display:none">
+      </section>
+    </div>
+
+    <!-- ===== ЗАКАЗ ЮВЕЛИРКИ ===== -->
+    <div class="group" id="g-jewel" data-types="jewelry" data-short="изделие">
+      <div class="group-head"><span class="num"></span><p class="group-title">изделие</p></div>
+
+      <section class="card" data-req="jmode">
+        <p class="label">Как оформить заказ <span class="req">*</span></p>
+        <div class="chips tiles" id="jmode"></div>
+        <p class="error">Выбери вариант</p>
+      </section>
+
+      <section class="card" data-jmode="text,form">
+        <p class="label">Заказ</p>
+        <div class="pair" style="margin-top:0">
+          <input type="text" id="jorder" maxlength="30" placeholder="№ заказа в админке">
+          <input type="date" id="jpickup" title="Когда клиент заберёт">
+        </div>
+        <p class="hint" style="margin:8px 2px 0">Справа — когда клиент заберёт. Руслану нужно 5–7 дней, макет для него должен быть готов раньше</p>
+      </section>
+
+      <!-- Вариант 1: просто вставить текст -->
+      <section class="card" data-req="jtext" data-jmode="text">
+        <p class="label">Текст заказа <span class="req">*</span></p>
+        <p class="hint">Вставь заказ целиком, как пишете обычно: изделие, кличка, телефон, размер, фактура, дизайн, шарм</p>
+        <textarea id="jtext" maxlength="1500" placeholder="#заказ&#10;Новый заказ на адресник:&#10;Кличка: Орбит&#10;Номер: +7…&#10;Формат: Двойной&#10;Размер: M&#10;Покрытие: фактурный полностью&#10;Дизайн: Хочу к маме"></textarea>
+        <div class="counter" data-for="jtext"></div>
+        <p class="error">Вставь текст заказа</p>
+      </section>
+
+      <!-- Вариант 2: кнопками, только главное -->
+      <section class="card" data-req="jitem" data-jmode="form">
+        <p class="label">Изделие <span class="req">*</span></p>
+        <div class="chips big" id="jitem"></div>
+        <p class="error">Выбери изделие</p>
+      </section>
+
+      <section class="card" data-req="jname" data-jmode="form">
+        <p class="label">Данные из админки <span class="req">*</span></p>
+        <p class="hint">Вставь одним куском, как пришло в админку: кличка, телефоны, всё для гравировки. Перепечатывать не нужно</p>
+        <textarea id="jname" maxlength="1000" placeholder="Кличка: Орбит&#10;Номер: +7 916 000-00-00, +7 916 000-00-01"></textarea>
+        <div class="counter" data-for="jname"></div>
+        <p class="error">Вставь данные из админки</p>
+      </section>
+
+      <section class="card" data-req="jformat" data-jmode="form" data-jitems="tag">
+        <p class="label">Тип адресника <span class="req">*</span></p>
+        <div class="chips" id="jformat"></div>
+        <p class="error">Выбери тип</p>
+      </section>
+
+      <section class="card" data-req="jmedal" data-jmode="form" data-jitems="tag">
+        <p class="label">Размер и фактура <span class="req">*</span></p>
+        <p class="medal-title" data-jdouble="1">Верхний медальон</p>
+        <p class="sublabel">Размер</p><div class="chips" id="jsize"></div>
+        <p class="sublabel">Фактура</p><div class="chips" id="jcoat"></div>
+        <div data-jdouble="1">
+          <p class="medal-title">Нижний медальон</p>
+          <p class="sublabel">Размер</p><div class="chips" id="jsize2"></div>
+          <p class="sublabel">Фактура</p><div class="chips" id="jcoat2"></div>
+        </div>
+        <p class="error">Выбери размер и фактуру</p>
+      </section>
+
+      <section class="card" data-req="jdesign" data-jmode="form" data-jitems="tag" data-jdouble="1">
+        <p class="label">Дизайн нижнего медальона <span class="req">*</span></p>
+        <p class="hint">Как в конструкторе на сайте</p>
+        <div class="designs" id="jdesign"></div>
+        <p class="error">Выбери дизайн</p>
+        <label class="toggle"><input type="checkbox" id="jrelabel"><span class="switch"></span><span class="toggle-text">Картинку оставить, надпись другая<span class="toggle-hint">Если клиент попросил свою надпись к этому рисунку</span></span></label>
+        <input type="text" id="jrelabel-text" maxlength="60" placeholder="Новая надпись, например «Хочу к бабушке»" style="display:none">
+      </section>
+
+      <section class="card" data-req="jpic" data-jmode="form" data-jitems="pendant,ring">
+        <p class="label">Картинка <span class="req">*</span></p>
+        <div class="chips" id="jpic"></div>
+        <p class="hint" style="margin:10px 2px 0">Портрет согласует Рина перед отправкой Руслану</p>
+        <p class="error">Выбери вариант</p>
+      </section>
+
+      <section class="card" data-jmode="form" data-jitems="pendant">
+        <p class="label">Второй слой</p>
+        <div class="chips" id="jlayer"></div>
+      </section>
+
+      <section class="card" data-jmode="text,form">
+        <p class="label">Комментарий</p>
+        <textarea id="jnote" class="short" maxlength="300" placeholder="Всё, что не влезло: шарм, цепочка, пожелания клиента"></textarea>
+        <label class="toggle">
+          <input type="checkbox" id="jfiles" checked>
+          <span class="switch"></span>
+          <span class="toggle-text">Пришлю фото питомца в чат дизайна<small>Ответом на карточку задачи после отправки</small></span>
+        </label>
+      </section>
+    </div>
+
+    <!-- ===== ГДЕ И КОГДА — всем ===== -->
+    <div class="group" id="g-when" data-types="social,site,print,jewelry" data-short="когда">
+      <div class="group-head"><span class="num"></span><p class="group-title" id="when-title">где и когда</p></div>
+
+      <section class="card" data-req="place" data-types="social-new">
+        <p class="label">Где разместим <span class="req">*</span> <span class="multi">можно несколько</span></p>
+        <p class="hint">Размеры дизайнер подберёт сам</p>
+        <div class="chips" id="place"></div>
+        <p class="error">Выбери площадку</p>
+      </section>
+
+      <section class="card" data-req="deadline">
+        <p class="label" id="dl-label">Когда нужен макет <span class="req">*</span></p>
+        <div class="chips" id="deadline"></div>
+        <div class="reveal" id="date-row"><input type="date" id="date"></div>
+        <div class="reveal" id="urgent-row">
+          <input type="text" id="urgent" maxlength="120" placeholder="Почему срочно? Например: запуск акции завтра">
+          <p class="hint">Срочные задачи сначала подтверждает Мария</p>
+        </div>
+        <p class="error" id="deadline-error">Выбери срок</p>
+        <div class="sub" data-types="social-new,site-new">
+          <p class="label">Дата публикации или запуска</p>
+          <input type="date" id="pub">
+        </div>
+      </section>
+
+      <section class="card" data-req="publisher" data-types="social,site">
+        <p class="label">Кто выложит готовое <span class="req">*</span></p>
+        <p class="hint">Бот перешлёт ему финальные файлы</p>
+        <div class="chips" id="publisher"></div>
+        <input type="text" id="publisher-name" maxlength="60" placeholder="Кто именно" style="margin-top:12px;display:none">
+        <p class="error">Выбери, кто выложит</p>
+      </section>
+    </div>
+
+    <!-- ===== МАТЕРИАЛЫ ===== -->
+    <div class="group" id="g-mat" data-types="social,site,print" data-short="материалы">
+      <div class="group-head"><span class="num"></span><p class="group-title">материалы</p></div>
+
+      <section class="card" data-req="textdate" data-types="social-new,site-new,print-new">
+        <p class="label">Текст на макете</p>
+        <div class="chips" id="textmode"></div>
+        <p class="hint" id="fish-hint" style="display:none;margin:10px 2px 0">Дизайнер поставит рыбный текст по смыслу, чтобы собрать макет. Финальный текст присылаешь ты — дизайнеры текст не пишут</p>
+        <div class="reveal" id="text-later">
+          <input type="date" id="text-date">
+          <p class="hint">Когда пришлёшь текст. Срок макета считается с момента, когда текст пришёл — бот напомнит</p>
+        </div>
+        <p class="error">Укажи, когда пришлёшь текст</p>
+        <div class="reveal show" id="text-field">
+          <textarea id="text" maxlength="600" placeholder="Заголовок, даты, цены, контакты — как должно быть в макете"></textarea>
+          <div class="counter" data-for="text"></div>
+        </div>
+      </section>
+
+      <section class="card" data-req="img" data-types="social-new,site-new,print-new">
+        <p class="label">Откуда картинка <span class="req">*</span></p>
+        <div class="chips" id="img"></div>
+        <p class="hint" id="shoot-hint" style="display:none;margin:10px 2px 0">Съёмка — отдельная задача со своими сроками. Бот уточнит у тебя дату и место</p>
+        <p class="error">Выбери, откуда картинка</p>
+      </section>
+
+      <section class="card" data-types="social,site,print">
+        <p class="label">В каком виде нужен результат <span class="multi">можно несколько</span></p>
+        <div class="chips" id="out"></div>
+      </section>
+
+      <section class="card" data-types="social,site,print">
+        <p class="label">Чего точно не надо</p>
+        <p class="hint">Сэкономит дизайнеру лишний круг</p>
+        <textarea id="nope" class="short" maxlength="300" placeholder="Например: без шишек и веток, без стикеров поверх"></textarea>
+      </section>
+
+      <section class="card" data-types="social-new,site-new,print-new">
+        <p class="label">Референсы и «по аналогии с…»</p>
+        <p class="hint">Ссылки на прошлые макеты, посты, Pinterest, Figma</p>
+        <textarea id="links" class="short" maxlength="400" placeholder="https://…"></textarea>
+        <input type="text" id="product" maxlength="200" placeholder="Ссылка на товар, если задача про товар" style="margin-top:10px">
+      </section>
+
+      <section class="card" data-types="social,site,print">
+        <label class="toggle" style="margin-top:0">
+          <input type="checkbox" id="files">
+          <span class="switch"></span>
+          <span class="toggle-text">Пришлю файлы или голосовое в чат дизайна<small>Фото, логотипы, исходники, уточнения — ответом на карточку задачи</small></span>
+        </label>
+      </section>
+
+      <div class="more" id="more" data-types="social-new,site-new">
+        <button type="button" class="more-btn" id="more-btn">
+          <span>подробнее</span>
+          <span class="plus">ещё 3 поля<span class="chev" id="chev"></span></span>
+        </button>
+        <div class="more-body">
+          <section class="card">
+            <p class="label">Акция или оффер</p>
+            <p class="hint">Цена, скидка, промокод и до какого числа</p>
+            <input type="text" id="offer" maxlength="120" placeholder="−20% на первое занятие до 30.11">
+          </section>
+          <section class="card">
+            <p class="label">Обязательно на макете</p>
+            <div class="chips" id="must"></div>
+            <p class="hint" id="erid-hint" style="margin:10px 2px 0;display:none">Нужен токен erid — дизайнер оставит под него место. Токен пришли в чат, когда получишь.</p>
+          </section>
+          <section class="card">
+            <p class="label">Размер, если знаешь точно</p>
+            <input type="text" id="size" maxlength="80" placeholder="1080×1440, А5…">
+          </section>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="bar">
+  <div class="bar-inner">
+    <div class="progress" id="progress"></div>
+    <button class="btn btn-primary" id="review" type="button">Проверить задачу</button>
+  </div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <div class="sheet-inner">
+    <div class="grabber"></div>
+    <h2 id="sheet-title">всё верно?</h2>
+    <div class="ticket" id="ticket"></div>
+    <div class="actions">
+      <button class="btn btn-primary" id="send" type="button">Отправить дизайнеру</button>
+      <button class="btn btn-ghost" id="edit" type="button">Поправить</button>
+    </div>
+    <p class="note" id="sheet-note"></p>
+  </div>
+</div>
+
+<div class="sent" id="done" aria-live="polite">
+  <div class="sent-hero"><div class="brand" style="width:100%;margin:0"><span id="logo2"></span><span id="hello2">задачи дизайнеру</span></div></div>
+  <div class="sent-inner">
+    <div class="sent-mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="bevel"/></svg></div>
+    <p class="sent-title">задача ушла</p>
+    <p class="sent-text" id="done-text"></p>
+    <button class="btn btn-primary" id="done-again" type="button">Поставить ещё одну</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  /* ---------- Иконки TEZI (Figma: TEZI DESIGN → Icons + Controls) ---------- */
+  const ICONS = {"alert": "<svg class=\"i\" viewBox=\"0 0 21.8496 21.8496\" fill=\"none\" aria-hidden=\"true\"><path d=\"M10.9248 0C16.9585 0 21.8496 4.89109 21.8496 10.9248C21.8496 16.9585 16.9585 21.8496 10.9248 21.8496C4.8911 21.8496 0 16.9585 0 10.9248C0 4.89109 4.8911 0 10.9248 0ZM10.9248 1.59961C5.77476 1.59961 1.59961 5.77474 1.59961 10.9248C1.59961 16.0749 5.77476 20.25 10.9248 20.25C16.0749 20.25 20.25 16.0749 20.25 10.9248C20.25 5.77474 16.0749 1.59961 10.9248 1.59961ZM11.6885 14.9746H10.0889V13.375H11.6885V14.9746ZM10.8887 5.8252C11.3305 5.8252 11.6885 6.18317 11.6885 6.625V11.4248C11.6885 11.8666 11.3305 12.2246 10.8887 12.2246C10.4468 12.2246 10.0889 11.8666 10.0889 11.4248V6.625C10.0889 6.18317 10.4468 5.8252 10.8887 5.8252Z\" fill=\"#F46982\"/></svg>", "edit": "<svg class=\"i\" viewBox=\"0 0 20.1592 19.2\" fill=\"none\" aria-hidden=\"true\"><path d=\"M20.1592 19.2H0.112305V17.6004H20.1592V19.2ZM10.6299 0.963664C12.4688 -0.540038 15.1818 -0.251969 16.6641 1.60429C18.0905 3.39061 17.8553 5.98351 16.1309 7.48417L6.37207 15.9773L5.84668 16.1736H0.799805L0 15.3738V10.0369L0.292969 9.41777L10.6299 0.963664ZM15.4141 2.60234C14.4876 1.44228 12.7918 1.26306 11.6426 2.20292L1.59961 10.4158V14.573H5.54785L15.0811 6.27714C16.1584 5.33925 16.3054 3.71858 15.4141 2.60234Z\" fill=\"currentColor\"/></svg>", "plus": "<svg class=\"i\" viewBox=\"0 0 20.5 20.5\" fill=\"none\" aria-hidden=\"true\"><path d=\"M11.0537 9.44629H20.5V11.0459H11.0537V20.5H9.4541V11.0459H0V9.44629H9.4541V0H11.0537V9.44629Z\" fill=\"currentColor\"/></svg>", "copy": "<svg class=\"i\" viewBox=\"0 0 19.8184 22.4121\" fill=\"none\" aria-hidden=\"true\"><path d=\"M14.5996 0.799805V5.4375H19.0186L19.8184 6.2373V21.6123L19.0186 22.4121H6.01855L5.21875 21.6123V16.9746H0.799805L0 16.1748V0.799805L0.799805 0H13.7998L14.5996 0.799805ZM6.81836 20.8125H18.2188V7.03711H6.81836V20.8125ZM1.59961 15.375H5.21875V6.2373L6.01855 5.4375H13V1.59961H1.59961V15.375Z\" fill=\"currentColor\"/></svg>", "gift": "<svg class=\"i\" viewBox=\"0 0 21.5215 19.7666\" fill=\"none\" aria-hidden=\"true\"><path d=\"M1.59961 18.167H19.9219V7.89456H21.5215V18.9668L20.7217 19.7666H0.799805L0 18.9668V7.89456H1.59961V18.167ZM15.3506 0.57425C16.4815 0.107267 17.6627 -0.107833 18.6709 0.0527658C19.7108 0.218493 20.6384 0.813617 20.9473 1.96488C21.2464 3.08108 20.8631 4.1031 20.1875 4.91409C19.5226 5.71201 18.5383 6.36064 17.4619 6.8389C15.883 7.54033 13.9407 7.94034 12.1895 7.81937L16.8096 14.4512L16.1523 14.9092L15.4971 15.3662L10.5752 8.30277L5.65723 15.3623L5.00195 14.9053L4.34473 14.4473L8.95703 7.82425C7.20752 7.94341 5.26816 7.54239 3.69141 6.84183C2.61512 6.36359 1.63166 5.71489 0.966797 4.91702C0.291149 4.10597 -0.0932013 3.0841 0.206055 1.9678C0.514852 0.816653 1.44268 0.221487 2.48242 0.0556955C3.49053 -0.104891 4.67189 0.110285 5.80273 0.57718C7.60794 1.32266 9.48903 2.79626 10.5752 4.85843C11.661 2.79427 13.5443 1.32021 15.3506 0.57425ZM5.19141 2.0557C4.23292 1.66004 3.3605 1.53637 2.73535 1.63577C2.14188 1.73031 1.85544 1.99636 1.75195 2.38187C1.62409 2.85864 1.74994 3.35791 2.19531 3.89261C2.65165 4.44035 3.40151 4.96249 4.34082 5.37991C5.9491 6.09443 7.89513 6.40638 9.42285 6.16409C8.6144 4.20698 6.89119 2.75756 5.19141 2.0557ZM18.4189 1.63284C17.7937 1.53329 16.9208 1.65687 15.9619 2.05277C14.2621 2.75464 12.5389 4.20401 11.7305 6.16116C13.2584 6.40349 15.2051 6.09068 16.8135 5.37601C17.7527 4.95858 18.5017 4.43644 18.958 3.8887C19.4032 3.35414 19.5301 2.8556 19.4023 2.37894C19.2989 1.99337 19.0124 1.72742 18.4189 1.63284Z\" fill=\"currentColor\"/></svg>", "clock": "<svg class=\"i\" viewBox=\"0 0 21.8496 21.8496\" fill=\"none\" aria-hidden=\"true\"><path d=\"M10.9248 0C16.9585 0 21.8496 4.89108 21.8496 10.9248C21.8496 16.9585 16.9585 21.8496 10.9248 21.8496C4.8911 21.8496 0 16.9585 0 10.9248C0 4.89108 4.8911 0 10.9248 0ZM10.9248 1.59961C5.77476 1.59961 1.59961 5.77474 1.59961 10.9248C1.59961 16.0749 5.77476 20.25 10.9248 20.25C16.0749 20.25 20.25 16.0749 20.25 10.9248C20.25 5.77474 16.0749 1.59961 10.9248 1.59961ZM11.7285 5.05078L11.7246 10.5928L14.9395 13.8076L13.8076 14.9395L10.3594 11.4902L10.125 10.9238L10.1289 5.04883L11.7285 5.05078Z\" fill=\"currentColor\"/></svg>", "upload": "<svg class=\"i\" viewBox=\"0 0 19.8965 19.8691\" fill=\"none\" aria-hidden=\"true\"><path d=\"M1.59961 14.4951C1.59961 16.5793 3.2898 18.2695 5.37402 18.2695H14.5225C16.6067 18.2695 18.2969 16.5793 18.2969 14.4951V10.2568H19.8965V14.4951C19.8965 17.463 17.4903 19.8691 14.5225 19.8691H5.37402C2.40615 19.8691 -2.98023e-07 17.463 0 14.4951V10.2568H1.59961V14.4951ZM15.7568 4.4375L14.7256 5.66211L10.7715 2.33203V14.1123H9.17188V2.33203L5.21777 5.66211L4.18652 4.4375L9.45605 0H10.4873L15.7568 4.4375Z\" fill=\"currentColor\"/></svg>", "home": "<svg class=\"i\" viewBox=\"0 0 23.377 21.2783\" fill=\"none\" aria-hidden=\"true\"><path d=\"M22.8486 8.4834C23.1825 8.74901 23.377 9.1525 23.377 9.5791V21.2783H21.7773V9.6748L11.6885 1.64746L1.59961 9.6748V21.2783H0V9.5791C0 9.1525 0.19449 8.74901 0.52832 8.4834L11.1904 0H12.1865L22.8486 8.4834ZM11.6904 7.82617C14.7498 7.82617 17.4052 9.86025 17.4053 13.1309C17.4053 15.2568 15.9919 17.3016 14.749 18.7148C14.1078 19.4439 13.4688 20.0528 12.9912 20.4785C12.7519 20.6919 12.5509 20.8612 12.4092 20.9775C12.3387 21.0354 12.2824 21.0802 12.2432 21.1113C12.2235 21.1269 12.2082 21.1399 12.1973 21.1484C12.192 21.1526 12.1877 21.1558 12.1846 21.1582C12.1831 21.1594 12.1816 21.1604 12.1807 21.1611L12.1787 21.1621H11.2021L11.2012 21.1611C11.2002 21.1604 11.1988 21.1594 11.1973 21.1582C11.1942 21.1558 11.1899 21.1526 11.1846 21.1484C11.1737 21.1399 11.1583 21.1269 11.1387 21.1113C11.0994 21.0801 11.0425 21.0357 10.9717 20.9775C10.83 20.8612 10.63 20.6919 10.3906 20.4785C9.91304 20.0527 9.27408 19.444 8.63281 18.7148C7.38988 17.3016 5.97656 15.2569 5.97656 13.1309C5.97666 9.86019 8.63301 7.8263 11.6904 7.82617ZM11.6904 9.42578C9.32129 9.42591 7.57627 10.9273 7.57617 13.1309C7.57617 14.6239 8.61993 16.2777 9.83398 17.6582C10.4212 18.3259 11.0112 18.8885 11.4551 19.2842C11.5383 19.3584 11.6189 19.4236 11.6904 19.4854C11.762 19.4236 11.8425 19.3584 11.9258 19.2842C12.3696 18.8885 12.9596 18.326 13.5469 17.6582C14.761 16.2777 15.8047 14.624 15.8047 13.1309C15.8046 10.9271 14.0612 9.42578 11.6904 9.42578Z\" fill=\"currentColor\"/></svg>", "chevron": "<svg class=\"i\" viewBox=\"0 0 22.5091 11.8171\" fill=\"none\" aria-hidden=\"true\"><path d=\"M21.9434 0.566829L11.258 11.2513L0.565496 0.565875\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linejoin=\"bevel\"/></svg>", "logo": "<svg class=\"logo\" aria-label=\"TEZI\" role=\"img\" viewBox=\"0 0 184 74.1293\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g>\n<path d=\"M51.4108 19.3723C51.4108 9.98014 60.2021 -1.35163 77.2909 0.1318C98.7482 1.87417 105.108 22.07 105.108 22.07C103.761 26.8555 99.7197 33.0622 99.7119 33.0742C99.7119 33.0742 93.7372 10.2891 74.8871 10.4816C57.3754 11.7132 58.4033 31.2617 80.6409 32.1382V39.3419C57.7608 40.0651 58.4245 62.8678 76.434 62.8678C104.526 62.8678 117.4 12.246 117.408 12.2144H165.631L137.891 50.5003H162.78V61.5456H117.539L145.278 22.9551H123.63C123.63 22.9551 107.566 74.1293 75.2575 74.1293C57.5195 74.1293 50.1438 62.0927 50.1438 52.2447C50.1438 40.117 59.9178 35.6489 59.9178 35.6489C59.9178 35.6489 51.4108 30.0866 51.4108 19.3723Z\" fill=\"currentColor\"/>\n<path d=\"M184 61.4997H172.973V12.2138H184V61.4997Z\" fill=\"currentColor\"/>\n<path d=\"M43.8925 22.9551H27.3953V61.4547H16.4972V22.9551H0L0 12.1688H43.8925V22.9551Z\" fill=\"currentColor\"/>\n</g>\n</svg>", "ig": "<svg class=\"i\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M7.36028 11.2654C9.02288 11.2654 10.3706 9.9153 10.3706 8.2499C10.3706 6.5845 9.02288 5.23438 7.36028 5.23438C5.69778 5.23438 4.34998 6.5845 4.34998 8.2499C4.34998 9.9153 5.69778 11.2654 7.36028 11.2654Z\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linejoin=\"bevel\"/><path d=\"M11.525 14.3569C6.09158 16.8591 0.601186 13.8761 0.599976 8.44333C0.597546 1.96801 8.49158 -0.522979 12.64 3.39783C16.0944 6.66223 14.727 11.1385 12.657 11.3889C11.2507 11.5583 10.3686 10.1733 10.3686 8.35493\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linejoin=\"bevel\"/><path d=\"M14.678 1.73568C14.9886 1.73568 15.2403 1.4818 15.2403 1.16862C15.2403 0.855442 14.9886 0.601562 14.678 0.601562C14.3674 0.601562 14.1156 0.855442 14.1156 1.16862C14.1156 1.4818 14.3674 1.73568 14.678 1.73568Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linejoin=\"bevel\"/></svg>", "cropmarks": "<svg class=\"i\" viewBox=\"0 0 24 24\" fill=\"none\" aria-hidden=\"true\"><path d=\"M7 7h10v10H7z\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linejoin=\"bevel\"/><path d=\"M7 1.8v3.4M17 1.8v3.4M7 18.8v3.4M17 18.8v3.4M1.8 7h3.4M1.8 17h3.4M18.8 7h3.4M18.8 17h3.4\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg>", "igline": "<svg class=\"i\" viewBox=\"4.1 3.6 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M11.6978 15.0154C13.3604 15.0154 14.7081 13.6653 14.7081 11.9999C14.7081 10.3345 13.3604 8.98438 11.6978 8.98438C10.0353 8.98438 8.6875 10.3345 8.6875 11.9999C8.6875 13.6653 10.0353 15.0154 11.6978 15.0154Z\" stroke=\"currentColor\" stroke-width=\"1.25\" stroke-linejoin=\"bevel\"/><path d=\"M15.8625 18.104C10.4291 20.6062 4.93871 17.6232 4.9375 12.1904C4.93507 5.71508 12.8291 3.22409 16.9775 7.1449C20.4319 10.4093 19.0645 14.8856 16.9945 15.136C15.5882 15.3054 14.7061 13.9204 14.7061 12.102\" stroke=\"currentColor\" stroke-width=\"1.25\" stroke-linejoin=\"bevel\"/><circle cx=\"19.0155\" cy=\"4.9177\" r=\"0.95\" fill=\"currentColor\"/></svg>", "tg": "<svg class=\"i\" viewBox=\"-1 -1 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M10.6922 13.1522L13.2532 0.578125L0.175659 4.21268C6.814 6.24517 0.688999 13.4952 0.688999 13.4952C0.688999 13.4952 6.2515 7.37017 10.6922 13.1522Z\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linejoin=\"bevel\"/><path d=\"M8.69003 5.17969L6.25403 7.80479\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linejoin=\"bevel\"/></svg>", "vk": "<svg class=\"i\" viewBox=\"-0.5 -3.5 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M0.599976 0.25V1.46088C0.599976 5.06907 3.52499 7.99407 7.13319 7.99407V4.49247M7.13319 4.49247V0.25M7.13319 4.49247C9.85089 4.49247 12.3716 3.07427 13.7825 0.75153L14.0492 0.3125\" stroke=\"currentColor\" stroke-width=\"1.2\"/><path d=\"M7.34216 4.5625C10.1284 4.5625 12.6909 6.0879 14.0192 8.5371L14.1137 8.7112\" stroke=\"currentColor\" stroke-width=\"1.2\"/></svg>", "globe": "<svg class=\"i\" viewBox=\"0 0 25 24\" fill=\"none\" aria-hidden=\"true\"><path d=\"M12.2766 22.2121C18.5928 22.2121 23.7131 17.64 23.7131 12C23.7131 6.36004 18.5928 1.78795 12.2766 1.78795C5.96032 1.78795 0.84 6.36004 0.84 12C0.84 17.64 5.96032 22.2121 12.2766 22.2121Z\" stroke=\"currentColor\" stroke-width=\"1.68\" stroke-linejoin=\"bevel\"/><path d=\"M12.2768 22.2121C14.6776 22.2121 16.6238 17.64 16.6238 12C16.6238 6.36004 14.6776 1.78795 12.2768 1.78795C9.87603 1.78795 7.92982 6.36004 7.92982 12C7.92982 17.64 9.87603 22.2121 12.2768 22.2121Z\" stroke=\"currentColor\" stroke-width=\"1.68\" stroke-linejoin=\"bevel\"/><path d=\"M23.4015 9.8829C23.4015 11.4353 20.5364 12.9971 12.2732 12.9971C4.01007 12.9971 1.1449 11.4353 1.1449 9.8829\" stroke=\"currentColor\" stroke-width=\"1.68\" stroke-linejoin=\"bevel\"/></svg>"};
+
+  /* ---------- Настройки: правь здесь ---------- */
+  const TYPES = [
+    {id:"social",  name:"Соцсети", icon:"igline"},
+    {id:"site",    name:"Для сайта", icon:"globe"},
+    {id:"print",   name:"Печать", icon:"cropmarks"},
+    {id:"jewelry", name:"Ювелирка", icon:"gift"}
+  ];
+  const KINDS = [
+    {id:"new",  name:"Новый макет", icon:"plus"},
+    {id:"edit", name:"Правка готового", icon:"edit"}
+  ];
+  const DIRECTIONS = [
+    {id:"school",   name:"Школа"},
+    {id:"grooming", name:"Груминг"},
+    {id:"store",    name:"Магазин"}
+  ];
+  // Топик, куда уйдёт задача: для печати и ювелирки — по типу
+  const TOPIC_BY_TYPE = {jewelry:"Ювелирка"};
+  const SALONS = [
+    {id:"ramenki", name:"Раменки"},
+    {id:"tulskaya", name:"Тульская"},
+    {id:"both", name:"Оба"}
+  ];
+  const CHANGES = [
+    {id:"date", name:"Дата"}, {id:"text", name:"Текст"}, {id:"price", name:"Цена"},
+    {id:"photo", name:"Фото"}, {id:"size", name:"Размер / формат"}
+  ];
+  const CHANGE_PRINT = {id:"prep", name:"Подготовить к печати"};
+  const SMM = ["Пост","Карусель","Сторис","Обложка рилса","Анимация"];
+  const FORMATS = {
+    social: {
+      school:   ["Афиша МК","Карусель МК",...SMM,"Другое"],
+      grooming: [...SMM,"Карточка Яндекс Карт","Шаблон Canva","Другое"],
+      store:    [...SMM,"Карточка Яндекс Карт","Другое"]
+    },
+    site: {
+      school:   ["Баннер","Блок или страница","Фото сотрудника","Другое"],
+      grooming: ["Баннер","Блок или страница","Фото сотрудника","Другое"],
+      store:    ["Баннер","Карточка товара","Блок или страница","Другое"]
+    }
+  };
+  const GRADES = [
+    {id:"groomer", name:"Грумер"},
+    {id:"top",     name:"Топ-грумер"},
+    {id:"stylist", name:"Грумер-стилист"},
+    {id:"art",     name:"Арт-директор"}
+  ];
+  const EVENT_FORMATS = ["Афиша МК","Карусель МК"];
+  const BIZ = [
+    {id:"sales",  name:"Записи и продажи сейчас"},
+    {id:"own",    name:"Свой продукт"},
+    {id:"image",  name:"Имидж"},
+    {id:"test",   name:"Тест идеи"}
+  ];
+  const AUDIENCES = [
+    {id:"grooming", name:"Клиенты груминга"},
+    {id:"store",    name:"Покупатели магазина"},
+    {id:"students", name:"Ученики школы"},
+    {id:"pros",     name:"Грумеры-профи"},
+    {id:"partners", name:"Партнёры"},
+    {id:"team",     name:"Команда"}
+  ];
+  const CTAS = [
+    {id:"book",  name:"Записаться"},
+    {id:"buy",   name:"Купить"},
+    {id:"write", name:"Написать нам"},
+    {id:"link",  name:"Перейти по ссылке"},
+    {id:"come",  name:"Прийти на событие"},
+    {id:"know",  name:"Узнать о нас"}
+  ];
+  const PLACES = [
+    {id:"ig",    name:"Instagram", icon:"ig"},
+    {id:"tg",    name:"Telegram", icon:"tg"},
+    {id:"vk",    name:"ВКонтакте", icon:"vk"},
+    {id:"ymaps", name:"Яндекс Карты"},
+    {id:"ycl",   name:"YClients"},
+    {id:"site",  name:"Сайт"},
+    {id:"salon", name:"В клубе"}
+  ];
+  const PITEMS = ["Мерч","Реклама","Свои товары","Другое"].map(n=>({id:n,name:n}));
+  const PSIZEMODES = [{id:"unknown", name:"Не знаю, подберите"},{id:"known", name:"Знаю размер"}];
+  const PMATS  = ["Матовая","Глянцевая","Картон","Не знаю"].map(n=>({id:n,name:n}));
+  const PWHO   = [{id:"print", name:"Типография"},{id:"salon", name:"Принтер в клубе"},{id:"unknown", name:"Пока не знаю"}];
+  const JITEMS = [{id:"tag", name:"Адресник"},{id:"pendant", name:"Кулон"},{id:"ring", name:"Кольцо"}];
+  // Опции — как в конструкторе tezi.store/constructor/petTag
+  const JMODES = [
+    {id:"text", name:"Вставить текст заказа", icon:"copy"},
+    {id:"form", name:"Заполнить кнопками", icon:"edit"}
+  ];
+  const JFORMATS = [{id:"single", name:"Одинарный"},{id:"double", name:"Двойной"}];
+  const JSIZES = [{id:"S", name:"S · 21 мм"},{id:"M", name:"M · 25 мм"},{id:"L", name:"L · 33 мм"}];
+  const JCOATS = [{id:"smooth", name:"Гладкий"},{id:"texture", name:"Фактурный"},{id:"edge", name:"Фактурный по краям"}];
+  // Дизайны нижнего медальона — набор как в конструкторе tezi.store, картинки из Figma «TEZI — Адресники — Картинки» (страница «Адресники»; «…балась, звоните папе» собран из компонента на странице «Рабочая»)
+  const DESIGN_DIR = "designs/";
+  const LEGACY_URL = "https://tezi.store/files/customProductImages/";
+  const JDESIGNS = [
+    ["mama","Хочу к маме"],
+    ["papa","Хочу к папе"],
+    ["bf1","Best friend лапка"],
+    ["bf2","Best friend сердце"],
+    ["pair_m","Ищу пару для хозяина"],
+    ["pair_f","Ищу пару для хозяйки"],
+    ["bun_p","Папина булочка"],
+    ["bun_m","Мамина булочка"],
+    ["smile","Собака улыбака"],
+    ["runner","Убегающий пездюк"],
+    ["lost_m_mama","Я про*бался, звоните маме"],
+    ["lost_f_mama","Я про*балась, звоните маме"],
+    ["lost_m_papa","Я про*бался, звоните папе"],
+    ["lost_f_papa","Я про*балась, звоните папе"],
+    ["houston","Хьюстон, у нас проблемы"],
+    ["sweet","Сладкая жёпка"],
+    ["mps1","Мамино псё"],
+    ["pps1","Папино псё"],
+    ["mps2","Мамино псё с короной"],
+    ["pps2","Папино псё с короной"],
+    ["call","Наберите кожаному"],
+    ["help","Памагитиии"],
+    ["keep","Вернуть нельзя оставить"],
+    ["manager","Мой менеджер"],
+    ["tail","Вертихвостка"],
+    ["cable","Типичный кобель"],
+    ["home","Хочу домой"],
+    ["son_m","Мамин псын"],
+    ["son_p","Папин псын"]
+  ].map(([id,name,legacy]) => ({id, name, src: legacy || DESIGN_DIR + id + ".png", legacy: !!legacy}));
+  const JPICS  = [{id:"portrait", name:"С портретом питомца"},{id:"none", name:"Без картинки"}];
+  const JLAYERS = ["Кость","Сердце","Лапка"].map(n=>({id:n,name:n}));
+  const OWNERS = [{id:"me", name:"Моя"},{id:"other", name:"Ставлю за другого"}];
+  const PBUDGET = [{id:"ok", name:"Согласовано с Марией"},{id:"need", name:"Нужно согласовать с Марией"}];
+  const IMGS = [
+    {id:"have",  name:"Есть фото — пришлю"},
+    {id:"shoot", name:"Нужна съёмка"},
+    {id:"gen",   name:"Сгенерировать"},
+    {id:"any",   name:"На усмотрение дизайнера"}
+  ];
+  const OUTS = [
+    {id:"png",   name:"PNG / JPG"},
+    {id:"canva", name:"Шаблон в Canva"},
+    {id:"figma", name:"Исходник Figma"},
+    {id:"pdf",   name:"PDF для печати"},
+    {id:"mp4",   name:"Видео MP4"}
+  ];
+  const OUT_DEFAULT = {social:["png"], site:["png"], print:["pdf"]};
+  const PUBLISHERS = [
+    {id:"me",    name:"Я сам(а)"},
+    {id:"admin", name:"Админ клуба"},
+    {id:"smm",   name:"SMM"},
+    {id:"dev",   name:"Разработка сайта"},
+    {id:"other", name:"Другой человек"}
+  ];
+  const TEXT_MODES = [
+    {id:"ready", name:"Текст ниже"},
+    {id:"later", name:"Пришлю позже"},
+    {id:"fish",  name:"Сделайте с рыбой"},
+    {id:"none",  name:"Без текста"}
+  ];
+  const DEADLINES = [
+    {id:"urgent", name:"Сегодня-завтра"},
+    {id:"3days",  name:"2–3 дня"},
+    {id:"week",   name:"Неделя"},
+    {id:"free",   name:"Без спешки"},
+    {id:"date",   name:"Точная дата"}
+  ];
+  const MUST = [
+    {id:"logo",  name:"Логотип"},
+    {id:"qr",    name:"QR-код"},
+    {id:"contacts", name:"Ссылка / контакты"},
+    {id:"address",  name:"Адрес клуба"},
+    {id:"price", name:"Цена"},
+    {id:"erid",  name:"Маркировка рекламы (erid)"}
+  ];
+  const MAX_BYTES = 3500; // карточка задачи должна влезть в одно сообщение Telegram (4096 символов)
+  // Адрес бота: ?api=https://… или поддомен туннеля из ссылки запуска (бот обновляет его сам при каждом старте)
+  const API_URL = () => { const q = new URLSearchParams(location.search).get("api"); if (q) return q.replace(/\/$/, "");
+    const p = ((tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || "").split("__")[1]; return p ? `https://${p}.trycloudflare.com` : ""; };
+  let lastCard = null;
+  /* ------------------------------------------- */
+
+  const tg = window.Telegram && window.Telegram.WebApp;
+  const inTelegram = !!(tg && tg.initData);
+  const $ = id => document.getElementById(id);
+  const MULTI = {out:1, fmt:1, aud:1, place:1, must:1, change:1};
+  const state = {type:null, kind:null, owner:"me", pbudget:null, img:null, out:[], publisher:null, dir:null, salon:null, change:[], fmt:[], biz:null, aud:[], cta:null,
+                 place:[], deadline:null, textmode:"ready", must:[], pitem:null, pmode:null, pmat:null, pwho:null,
+                 evgrade:null, psizemode:null, jmode:null, jitem:null, jformat:null, jsize:null, jcoat:null, jsize2:null, jcoat2:null, jdesign:null, jpic:null, jlayer:null};
+
+  document.getElementById("logo").innerHTML = ICONS.logo;
+  document.getElementById("logo2").innerHTML = ICONS.logo;
+  if (tg){
+    try{ tg.ready(); tg.expand(); tg.setHeaderColor && tg.setHeaderColor("#fff0dc"); tg.setBackgroundColor && tg.setBackgroundColor("#fdfdfd"); }catch(e){}
+    const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    if (u && u.first_name) { $("hello").textContent = "привет, " + u.first_name; $("hello2").textContent = "привет, " + u.first_name; }
+  }
+  const haptic = () => { try{ tg && tg.HapticFeedback && tg.HapticFeedback.selectionChanged(); }catch(e){} };
+  const picked = (k, id) => MULTI[k] ? state[k].includes(id) : state[k] === id;
+
+  function renderChips(el, items, key, onPick){
+    el.innerHTML = "";
+    items.forEach(it => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip";
+      b.setAttribute("aria-pressed", String(picked(key, it.id)));
+      if (it.icon && ICONS[it.icon]){ b.innerHTML = ICONS[it.icon]; b.classList.add("has-icon"); }
+      b.appendChild(document.createTextNode(it.name));
+      b.onclick = () => {
+        if (MULTI[key]){
+          const i = state[key].indexOf(it.id);
+          i >= 0 ? state[key].splice(i,1) : state[key].push(it.id);
+          b.setAttribute("aria-pressed", String(i < 0));
+        } else {
+          state[key] = it.id;
+          el.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed","false"));
+          b.setAttribute("aria-pressed","true");
+        }
+        haptic(); clearError(key); onPick && onPick(it); refresh();
+      };
+      el.appendChild(b);
+    });
+  }
+
+  function renderFormats(){
+    const list = ((FORMATS[state.type] || {})[state.dir] || []).map(n => ({id:n, name:n}));
+    state.fmt = state.fmt.filter(f => list.some(x => x.id === f));
+    renderChips($("fmt"), list, "fmt");
+  }
+
+  document.querySelectorAll(".error").forEach(e => e.insertAdjacentHTML("afterbegin", ICONS.alert));
+  renderChips($("type"), TYPES, "type", () => { renderChanges(); renderFormats(); state.out = [...(OUT_DEFAULT[state.type] || [])]; renderOuts(); });
+  renderChips($("kind"), KINDS, "kind");
+  renderChips($("owner"), OWNERS, "owner", o => { $("owner-name").style.display = o.id === "other" ? "" : "none"; if (o.id === "other") $("owner-name").focus(); });
+  renderChips($("pbudget"), PBUDGET, "pbudget");
+  renderChips($("img"), IMGS, "img", i => { $("shoot-hint").style.display = i.id === "shoot" ? "block" : "none"; });
+  renderChips($("publisher"), PUBLISHERS, "publisher", x => { $("publisher-name").style.display = (x.id === "admin" || x.id === "other") ? "" : "none"; });
+  function renderOuts(){ renderChips($("out"), OUTS, "out"); }
+  renderOuts();
+  $("series").addEventListener("change", () => { $("series-link").style.display = $("series").checked ? "" : "none"; });
+  renderChips($("dir"), DIRECTIONS, "dir", renderFormats);
+  renderChips($("salon"), SALONS, "salon");
+  function renderChanges(){
+    const list = state.type === "print" ? [...CHANGES, CHANGE_PRINT] : CHANGES;
+    state.change = state.change.filter(c => list.some(x => x.id === c));
+    renderChips($("change"), list, "change");
+  }
+  renderChanges();
+  renderFormats();
+  renderChips($("evgrade"), GRADES, "evgrade");
+  renderChips($("biz"), BIZ, "biz");
+  renderChips($("aud"), AUDIENCES, "aud");
+  renderChips($("cta"), CTAS, "cta");
+  renderChips($("place"), PLACES, "place");
+  renderChips($("pitem"), PITEMS, "pitem");
+  renderChips($("psizemode"), PSIZEMODES, "psizemode", m => { $("psize").style.display = m.id === "known" ? "" : "none"; if (m.id === "known") $("psize").focus(); });
+  renderChips($("pmat"), PMATS, "pmat");
+  renderChips($("pwho"), PWHO, "pwho", w => { $("preq").style.display = w.id === "print" ? "" : "none"; });
+  renderChips($("jmode"), JMODES, "jmode");
+  renderChips($("jitem"), JITEMS, "jitem");
+  renderChips($("jformat"), JFORMATS, "jformat");
+  renderChips($("jsize"), JSIZES, "jsize");   renderChips($("jsize2"), JSIZES, "jsize2");
+  renderChips($("jcoat"), JCOATS, "jcoat");   renderChips($("jcoat2"), JCOATS, "jcoat2");
+  // Плитки дизайнов с превью
+  (function(){
+    const box = $("jdesign");
+    JDESIGNS.forEach(d => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "design"; b.setAttribute("aria-pressed","false");
+      b.innerHTML = `<span class="design-img${d.legacy ? " legacy" : ""}"><img src="${d.src}" alt="" loading="lazy"></span><span class="design-name">${d.name}</span>`;
+      b.onclick = () => {
+        state.jdesign = d.id; haptic();
+        box.querySelectorAll(".design").forEach(x => x.setAttribute("aria-pressed","false"));
+        b.setAttribute("aria-pressed","true"); clearError("jdesign"); refresh();
+      };
+      box.appendChild(b);
+    });
+  })();
+  renderChips($("jpic"), JPICS, "jpic");
+  renderChips($("jlayer"), JLAYERS, "jlayer");
+  renderChips($("textmode"), TEXT_MODES, "textmode", m => { $("text-field").classList.toggle("show", m.id === "ready"); $("fish-hint").style.display = m.id === "fish" ? "block" : "none"; $("text-later").classList.toggle("show", m.id === "later"); });
+  renderChips($("deadline"), DEADLINES, "deadline", d => {
+    $("date-row").classList.toggle("show", d.id === "date");
+    $("urgent-row").classList.toggle("show", d.id === "urgent");
+  });
+  renderChips($("must"), MUST, "must", () => { $("erid-hint").style.display = state.must.includes("erid") ? "block" : "none"; });
+  const today = new Date().toISOString().slice(0,10);
+  ["date","pub","ev-date","text-date","jpickup"].forEach(id => $(id).min = today);
+  $("chev").innerHTML = ICONS.chevron;
+  $("more-btn").onclick = () => { $("more").classList.toggle("open"); haptic(); };
+
+  // Предвыбор из ссылки: …?type=new&dir=school
+  const qs = new URLSearchParams(location.search);
+  const rawStart = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || qs.get("tgWebAppStartParam") || "";
+  const [start, tunnel] = rawStart.split("__");
+  const preType = qs.get("type") || (TYPES.some(t => t.id === start) ? start : null);
+  const preDir = qs.get("dir") || (DIRECTIONS.some(d => d.id === start) ? start : null);
+  if (preType){ state.type = preType; renderChips($("type"), TYPES, "type"); }
+  if (preDir && DIRECTIONS.some(d => d.id === preDir)){ state.dir = preDir; renderChips($("dir"), DIRECTIONS, "dir", renderFormats); renderFormats(); }
+
+  // Автовысота и счётчики
+  function autoGrow(t){ t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 320) + "px"; }
+  document.querySelectorAll("textarea").forEach(t => t.addEventListener("input", () => autoGrow(t)));
+  document.querySelectorAll(".counter").forEach(c => {
+    const f = $(c.dataset.for);
+    const upd = () => { c.textContent = f.value.length ? `${f.value.length} / ${f.maxLength}` : ""; };
+    f.addEventListener("input", upd); upd();
+  });
+  const FIELD_KEY = {"owner-name":"owner", "text-date":"textdate", "biz-own":"biz", "aud-own":"aud", "cta-own":"cta", src:"src", "change-text":"change", title:"title", msg:"msg", date:"deadline", urgent:"deadline",
+                     psize:"psize", jname:"jname", jtext:"jtext", "ev-name":"event", "ev-date":"event"};
+  Object.keys(FIELD_KEY).forEach(id => $(id).addEventListener("input", () => { clearError(FIELD_KEY[id]); refresh(); }));
+  $("src-later").addEventListener("change", () => { clearError("src"); refresh(); });
+  $("jrelabel").addEventListener("change", () => { $("jrelabel-text").style.display = $("jrelabel").checked ? "" : "none"; refresh(); });
+  function clearError(key){ const c = document.querySelector(`[data-req="${key}"]`); c && c.classList.remove("has-error"); }
+
+  /* ---------- Видимость по типу ---------- */
+  function typeTokens(){
+    const t = state.type; if (!t) return [];
+    const tok = [t];
+    if (t !== "jewelry" && state.kind){ tok.push(state.kind, t + "-" + state.kind); }
+    return tok;
+  }
+  function isShown(el){
+    // скрыт, если любой предок с data-types не подходит
+    for (let n = el; n && n !== document.body; n = n.parentElement){
+      if (n.dataset && n.dataset.types){
+        const tok = typeTokens();
+        if (!n.dataset.types.split(",").some(x => tok.includes(x))) return false;
+      }
+      if (n.dataset && n.dataset.jmode && !n.dataset.jmode.split(",").includes(state.jmode)) return false;
+      if (n.dataset && n.dataset.jitems && !n.dataset.jitems.split(",").includes(state.jitem)) return false;
+      if (n.dataset && n.dataset.jdouble && state.jformat !== "double") return false;
+      if (n.id === "event" && !showEvent()) return false;
+      if (n.classList && n.classList.contains("group") && n.id !== "g-task" && !(state.type && (state.type === "jewelry" || state.kind))) return false;
+    }
+    return true;
+  }
+  const showEvent = () => state.type === "social" && state.kind === "new" && state.dir === "school" && state.fmt.some(f => EVENT_FORMATS.includes(f));
+
+  function applyVisibility(){
+    document.querySelectorAll("[data-types],[data-jmode],[data-jitems],[data-jdouble],#event").forEach(el => { el.style.display = isShown(el) ? "" : "none"; });
+    // группы до выбора типа скрыты
+    const ready = state.type && (state.type === "jewelry" || state.kind);
+    document.querySelectorAll(".group").forEach(g => { if (g.id !== "g-task" && !ready) g.style.display = "none"; });
+    // подписи срока под тип
+    const lbl = state.type === "jewelry" ? "Когда нужен макет для Руслана"
+              : state.kind === "edit" ? "Когда нужна правка"
+              : state.type === "print" ? "Когда нужно в руках" : "Когда нужен макет";
+    $("dl-label").firstChild.textContent = lbl + " ";
+    $("when-title").textContent = (state.type === "social" && state.kind === "new") ? "где и когда" : "когда";
+    // номера групп и шаги
+    const groups = [...document.querySelectorAll(".group")].filter(g => g.style.display !== "none");
+    groups.forEach((g,i) => g.querySelector(".num").textContent = String(i+1).padStart(2,"0"));
+    const steps = $("steps");
+    steps.innerHTML = groups.map(g => `<a href="#${g.id}" data-g="${g.id}">${g.dataset.short}</a>`).join("");
+    observeGroups(groups);
+  }
+
+  /* ---------- Обязательные поля ---------- */
+  function reqKeys(){
+    return [...document.querySelectorAll("[data-req]")].filter(c => c.tagName === "SECTION" && isShown(c)).map(c => c.dataset.req);
+  }
+  function isFilled(key){
+    const v = id => $(id).value.trim();
+    switch (key){
+      case "src": return !!v("src") || $("src-later").checked;
+      case "change": return state.change.length > 0 || !!v("change-text");
+      case "title": case "msg": return !!v(key);
+      case "psize": return state.psizemode === "unknown" || (state.psizemode === "known" && !!v("psize"));
+      case "jname": case "jtext": return !!v(key);
+      case "jmedal": return !!(state.jsize && state.jcoat) && (state.jformat !== "double" || !!(state.jsize2 && state.jcoat2));
+      case "event": return !!v("ev-name") && !!$("ev-date").value && !!state.evgrade;
+      case "deadline":
+        if (!state.deadline) return false;
+        if (state.deadline === "date") return !!$("date").value;
+        if (state.deadline === "urgent") return !!v("urgent");
+        return true;
+      case "owner": return state.owner !== "other" || !!v("owner-name");
+      case "textdate": return state.textmode !== "later" || !!$("text-date").value;
+      case "biz": case "aud": case "cta": return (MULTI[key] ? state[key].length > 0 : !!state[key]) || !!v(key + "-own");
+      default: return MULTI[key] ? state[key].length > 0 : !!state[key];
+    }
+  }
+  function groupDone(g){
+    const keys = [...g.querySelectorAll("section[data-req]")].filter(isShown).map(c => c.dataset.req);
+    return keys.length > 0 && keys.every(isFilled);
+  }
+  function refresh(){
+    applyVisibility();
+    document.querySelectorAll("section.has-error[data-req]").forEach(c => { if (isFilled(c.dataset.req)) c.classList.remove("has-error"); });
+    const keys = reqKeys();
+    const done = keys.filter(isFilled).length;
+    $("progress").textContent = !state.type ? "Выбери, что нужно" :
+      done === keys.length ? "Всё обязательное заполнено ✓" : `Обязательных полей: ${done} из ${keys.length}`;
+    document.querySelectorAll("#steps a").forEach(a => a.classList.toggle("done", groupDone($(a.dataset.g))));
+  }
+
+  let io = null;
+  function observeGroups(groups){
+    if (!("IntersectionObserver" in window)) return;
+    io && io.disconnect();
+    io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) document.querySelectorAll("#steps a").forEach(a => a.classList.toggle("active", a.dataset.g === e.target.id));
+    }), {rootMargin:"-45% 0px -50% 0px"});
+    groups.forEach(g => io.observe(g));
+    const first = document.querySelector("#steps a"); first && first.classList.add("active");
+  }
+
+  function validate(){
+    let first = null;
+    if (!state.type){ document.querySelector('[data-req="type"]').classList.add("has-error"); first = document.querySelector('[data-req="type"]'); }
+    reqKeys().forEach(k => {
+      if (!isFilled(k)){ const c = document.querySelector(`[data-req="${k}"]`); c.classList.add("has-error"); first = first || c; }
+    });
+    $("deadline-error").textContent = state.deadline === "urgent" ? "Напиши, почему срочно" :
+                                      state.deadline === "date" ? "Выбери дату" : "Выбери срок";
+    if (first){
+      first.scrollIntoView({behavior:"smooth", block:"center"});
+      try{ tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("error"); }catch(e){}
+    }
+    return !first;
+  }
+
+  /* ---------- Данные для бота ---------- */
+  function payload(){
+    const v = id => $(id).value.trim();
+    const t = state.type, k = state.kind;
+    const p = {v:4, type:t, salon:state.salon, dl:state.deadline,
+               date: state.deadline === "date" ? $("date").value : "",
+               why: state.deadline === "urgent" ? v("urgent") : ""};
+    p.owner = state.owner === "other" ? v("owner-name") : "author";
+    if (t !== "jewelry"){ p.kind = k; p.dir = state.dir; p.nope = v("nope"); p.files = $("files").checked; p.out = state.out; }
+    if (t === "social" || t === "site"){ p.publisher = state.publisher; p.publisherName = v("publisher-name"); }
+    else p.dir = "store";
+    if (t !== "jewelry" && k === "edit"){
+      Object.assign(p, {src:v("src"), srcLater:$("src-later").checked, change:state.change, ctext:v("change-text")});
+    }
+    if ((t === "social" || t === "site") && k === "new"){
+      Object.assign(p, {fmt:state.fmt, title:v("title"), biz:state.biz, bizOwn:v("biz-own"), aud:state.aud, audOwn:v("aud-own"), cta:state.cta, ctaOwn:v("cta-own"), msg:v("msg"),
+        place: t === "social" ? state.place : ["site"], pub:$("pub").value, tm:state.textmode, text: state.textmode === "ready" ? v("text") : "",
+        links:v("links"), product:v("product"), offer:v("offer"), must:state.must, size:v("size"), img:state.img,
+        textDate: state.textmode === "later" ? $("text-date").value : "", series: $("series").checked ? (v("series-link") || "да") : ""});
+      if (showEvent()) p.ev = {name:v("ev-name"), breed:v("ev-breed"), master:v("ev-master"), grade:state.evgrade, date:$("ev-date").value, time:v("ev-time")};
+    }
+    if (t === "print" && k === "new"){
+      Object.assign(p, {pitem:state.pitem, psize: state.psizemode === "known" ? v("psize") : "не знаю, подберите", pmat:state.pmat, pqty:v("pqty"),
+        pwho:state.pwho, preq:v("preq"), pbudget:state.pbudget, img:state.img, textDate: state.textmode === "later" ? $("text-date").value : "", tm:state.textmode, text: state.textmode === "ready" ? v("text") : "",
+        links:v("links"), product:v("product")});
+    }
+    if (t === "jewelry"){
+      p.jmode = state.jmode; p.jorder = v("jorder"); p.jpickup = $("jpickup").value;
+      Object.assign(p, {jnote:v("jnote"), files:$("jfiles").checked});
+      if (state.jmode === "text"){
+        p.jtext = v("jtext");
+      } else {
+        Object.assign(p, {jitem:state.jitem, jname:v("jname")});
+        if (state.jitem === "tag"){
+          const dbl = state.jformat === "double";
+          Object.assign(p, {jformat:state.jformat,
+            top:{size:state.jsize, coat:state.jcoat},
+            bottom: dbl ? {size:state.jsize2, coat:state.jcoat2} : null,
+            jdesign: dbl ? state.jdesign : null,
+            jrelabel: dbl && $("jrelabel").checked ? v("jrelabel-text") : ""});
+        } else {
+          Object.assign(p, {jpic:state.jpic, jlayer: state.jitem === "pendant" ? state.jlayer : ""});
+        }
+      }
+    }
+    return p;
+  }
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const nameOf = (list, id) => (list.find(x => x.id === id) || {}).name || "";
+  const names = (list, ids) => (ids || []).map(id => nameOf(list, id)).join(", ");
+  const ruDate = s => { if (!s) return ""; if (s.includes(".")) return s; const [y,m,d] = s.split("-"); return `${d}.${m}.${y}`; };
+  function fmtDeadline(p){
+    if (p.dl === "date") return ruDate(p.date);
+    if (p.dl === "urgent") return `Сегодня-завтра — ${p.why}`;
+    return nameOf(DEADLINES, p.dl);
+  }
+  function topicOf(p){ return TOPIC_BY_TYPE[p.type] || nameOf(DIRECTIONS, p.dir); }
+  // Куда бот постит направления — настраивается в боте (топик для каждого направления)
+
+  function openSheet(){
+    if (!validate()) return;
+    const p = payload();
+    const bytes = new TextEncoder().encode(JSON.stringify(p)).length;
+    let tags = [], title = "", lead = "", rows = [];
+    const salon = nameOf(SALONS, p.salon);
+    const chan = nameOf(TYPES, p.type), dirName = nameOf(DIRECTIONS, p.dir);
+    const textRow = p.tm === "ready" ? p.text : p.tm === "later" ? `Пришлю к ${ruDate(p.textDate)}` : nameOf(TEXT_MODES, p.tm);
+    const pubRow = ["Выложит", [nameOf(PUBLISHERS, p.publisher), p.publisherName].filter(Boolean).join(": ")];
+    const common = [["Срок", fmtDeadline(p)], ["Клуб", salon], ["Результат", names(OUTS, p.out)], pubRow,
+                    ["Не надо", p.nope], ["Файлы", p.files ? "Пришлю в чат" : ""], ["Согласует", p.owner !== "author" ? p.owner : ""]];
+    if (p.type !== "jewelry" && p.kind === "edit"){
+      tags = [chan, dirName, "Правка"];
+      title = "Правка готового макета";
+      lead = [names(p.type === "print" ? [...CHANGES, CHANGE_PRINT] : CHANGES, p.change), p.ctext].filter(Boolean).join(" — ");
+      rows = [["Исходник", p.src || (p.srcLater ? "Пришлю в чате ответом на карточку" : "")], ...common];
+    }
+    if ((p.type === "social" || p.type === "site") && p.kind === "new"){
+      tags = [chan, dirName, ...p.fmt];
+      title = p.title; lead = `«${p.msg}»`;
+      const both = (a, b) => [a, b].filter(Boolean).join(". ");
+      rows = [["Зачем", both(nameOf(BIZ, p.biz), p.bizOwn)], ["Для кого", both(names(AUDIENCES, p.aud), p.audOwn)], ["Действие", both(nameOf(CTAS, p.cta), p.ctaOwn)],
+              ["МК", p.ev ? [p.ev.name, p.ev.breed, [p.ev.master, nameOf(GRADES, p.ev.grade)].filter(Boolean).join(", "), ruDate(p.ev.date), p.ev.time].filter(Boolean).join(" · ") : ""],
+              ["Где", p.type === "social" ? names(PLACES, p.place) : ""], ["Публикация", ruDate(p.pub)],
+              ["Текст", textRow], ["Картинка", nameOf(IMGS, p.img)], ["Серия", p.series], ["Референсы", p.links],
+              ["Товар", p.product], ["Акция", p.offer], ["Обязательно", names(MUST, p.must)], ["Размер", p.size], ...common];
+    }
+    if (p.type === "print" && p.kind === "new"){
+      tags = [chan, dirName, p.pitem];
+      title = `Печать: ${p.pitem}`; lead = "";
+      rows = [["Размер", p.psize], ["Материал", p.pmat], ["Тираж", p.pqty], ["Бюджет", nameOf(PBUDGET, p.pbudget)], ["Кто печатает", nameOf(PWHO, p.pwho)], ["Требования", p.preq],
+              ["Текст", textRow], ["Картинка", nameOf(IMGS, p.img)], ["Референсы", p.links], ...common];
+      rows[rows.findIndex(r => r[0] === "Срок")][0] = "В руках к";
+    }
+    if (p.type === "jewelry"){
+      const salonRow = ["Клуб", salon], dlRow = ["Срок", fmtDeadline(p)], photoRow = ["Фото питомца", p.files ? "Пришлю в чат" : ""];
+      if (p.jmode === "text"){
+        tags = ["Магазин", "Ювелирка", "Текстом"];
+        title = "Заказ ювелирки";
+        lead = "";
+        rows = [["№ заказа", p.jorder], ["Клиент заберёт", ruDate(p.jpickup)], ["Заказ", p.jtext], ["Комментарий", p.jnote], dlRow, salonRow, photoRow, ["Согласует", p.owner !== "author" ? p.owner : ""], ["На выходе", ".ai для Руслана + превью"]];
+      } else {
+        tags = ["Магазин", "Ювелирка", nameOf(JITEMS, p.jitem)];
+        const nm = (p.jname || "").match(/кличка\s*[:\-—]\s*([^\n,]+)/i); const first = (nm ? nm[1] : (p.jname || "").split("\n")[0]).trim();
+        title = `${nameOf(JITEMS, p.jitem)} «${first}»`;
+        const medal = m => m ? [m.size, nameOf(JCOATS, m.coat)].filter(Boolean).join(" · ") : "";
+        lead = p.jitem === "tag" ? nameOf(JFORMATS, p.jformat) : "";
+        rows = [["№ заказа", p.jorder], ["Клиент заберёт", ruDate(p.jpickup)], ["Из админки", p.jname], [p.bottom ? "Верхний" : "Медальон", medal(p.top)], ["Нижний", medal(p.bottom)],
+                ["Дизайн", p.jdesign ? nameOf(JDESIGNS, p.jdesign) + (p.jrelabel ? ` — надпись заменить на «${p.jrelabel}»` : "") : ""],
+                ["Картинка", nameOf(JPICS, p.jpic)], ["Второй слой", p.jlayer],
+                ["Комментарий", p.jnote], dlRow, salonRow, photoRow, ["Согласует", p.owner !== "author" ? p.owner : ""], ["На выходе", ".ai для Руслана + превью"]];
+      }
+    }
+    rows = rows.filter(r => r[1]);
+    lastCard = {urgent: p.dl === "urgent", tags: tags.filter(Boolean), title, lead, rows};
+    $("ticket").innerHTML =
+      `<div class="tags">${p.dl === "urgent" ? '<span class="tag hot">срочно</span>' : ""}${tags.filter(Boolean).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+       <p class="ticket-title">${esc(title)}</p>
+       ${lead ? `<p class="ticket-msg">${esc(lead)}</p>` : ""}
+       <dl style="margin:0">${rows.map(r => `<div class="row"><dt>${r[0]}</dt><dd>${esc(r[1])}</dd></div>`).join("")}</dl>`;
+    const over = bytes > MAX_BYTES;
+    $("send").disabled = over;
+    $("send").style.opacity = over ? .4 : 1;
+    const topic = topicOf(p);
+    $("sheet-note").textContent = over
+      ? "ТЗ получилось слишком длинным для Telegram — сократи текст, а подробности допиши в чат после отправки."
+      : p.pbudget === "need" ? `Сначала Мария согласует тираж и бюджет, потом задача уйдёт дизайнеру.`
+      : p.dl === "urgent" ? `Сначала срочность подтвердит Мария, потом задача уйдёт дизайнеру.` + (p.owner && p.owner !== "author" ? ` Результат согласует ${p.owner}.` : " Согласуешь результат ты.")
+      : (TOPIC_BY_TYPE[p.type] ? `Задача уйдёт в топик «${topic}».` : `Направление «${topic}».`) + (p.owner && p.owner !== "author" ? ` Результат согласует ${p.owner}.` : " Согласуешь результат ты.");
+    $("backdrop").classList.add("open"); $("sheet").classList.add("open");
+    haptic();
+  }
+  function closeSheet(){ $("backdrop").classList.remove("open"); $("sheet").classList.remove("open"); }
+  function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2600); }
+
+  $("done-again").onclick = () => location.reload();
+  $("review").onclick = openSheet;
+  $("edit").onclick = closeSheet;
+  $("backdrop").onclick = closeSheet;
+  function showDone(p){
+    closeSheet();
+    $("done-text").textContent = `Задача появится в топике «${topicOf(p)}». Когда дизайнер её возьмёт, бот отметит тебя там. Файлы и голосовые присылай ответом на карточку задачи.`;
+    $("done").classList.add("show");
+  }
+  let sending = false;
+  $("send").onclick = async () => {
+    const p = payload();
+    if (inTelegram){
+      const api = API_URL();
+      if (!api){ toast("Не нашла адрес бота. Открой форму кнопкой «Новая задача» в топике"); return; }
+      if (sending) return; sending = true; $("send").textContent = "Отправляю…";
+      try{
+        const r = await fetch(api + "/task", {method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({initData: tg.initData, payload: p, card: lastCard})});
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) throw new Error(j.error || ("HTTP " + r.status));
+        try{ tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("success"); }catch(e){}
+        showDone(p);
+        if (j.topic) $("done-text").textContent = `Задача #${j.num} появится в топике «${j.topic}». Когда дизайнер её возьмёт, бот отметит тебя там. Файлы и голосовые присылай ответом на карточку задачи.`;
+      }catch(e){
+        try{ tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("error"); }catch(_){}
+        toast("Не получилось отправить: бот сейчас не отвечает. Попробуй ещё раз через минуту");
+      }finally{ sending = false; $("send").textContent = "Отправить дизайнеру"; }
+    } else {
+      closeSheet(); console.log("TEZI task payload:", data);
+      const p = payload();
+      $("done-text").textContent = `Задача появится в топике «${topicOf(p)}». Когда дизайнер её возьмёт, бот отметит тебя там. Файлы и голосовые присылай ответом на карточку задачи.`;
+      $("done").classList.add("show");
+    }
+  };
+
+  refresh();
+})();
+</script>
+</body>
+</html>
