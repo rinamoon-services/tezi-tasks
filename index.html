@@ -883,11 +883,19 @@
     {id:"price", name:"Цена"},
     {id:"erid",  name:"Маркировка рекламы (erid)"}
   ];
-  const MAX_BYTES = 3500; // карточка задачи должна влезть в одно сообщение Telegram (4096 символов)
-  // Адрес бота: ?api=https://… или поддомен туннеля из ссылки запуска (бот обновляет его сам при каждом старте)
-  const API_URL = () => { const q = new URLSearchParams(location.search).get("api"); if (q) return q.replace(/\/$/, "");
-    const p = ((tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || "").split("__")[1]; return p ? `https://${p}.trycloudflare.com` : ""; };
+  const MAX_BYTES = 4000; // лимит Telegram sendData — 4096 байт
   let lastCard = null;
+  // Что уходит боту: короткие служебные поля + готовая карточка (её строки бот публикует как есть)
+  const PRE_KEYS = {text:1, jtext:1, jname:1};
+  function botMessage(p, c){
+    const pre = {}; Object.keys(PRE_KEYS).forEach(k => { if (p[k]) pre[k] = p[k]; });
+    const longVals = new Set(Object.values(pre));
+    return {v:5,
+      m:{type:p.type, dir:p.dir, dl:p.dl, pbudget:p.pbudget || "", owner:p.owner, publisher:p.publisher || "", publisherName:p.publisherName || "",
+         files:!!p.files, srcLater:!!p.srcLater, src:p.src || ""},
+      c:{u:c.urgent ? 1 : 0, g:c.tags, t:c.title, l:c.lead, r:c.rows.filter(r => !longVals.has(r[1]))},
+      pre};
+  }
   /* ------------------------------------------- */
 
   const tg = window.Telegram && window.Telegram.WebApp;
@@ -1001,8 +1009,7 @@
 
   // Предвыбор из ссылки: …?type=new&dir=school
   const qs = new URLSearchParams(location.search);
-  const rawStart = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || qs.get("tgWebAppStartParam") || "";
-  const [start, tunnel] = rawStart.split("__");
+  const start = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || "";
   const preType = qs.get("type") || (TYPES.some(t => t.id === start) ? start : null);
   const preDir = qs.get("dir") || (DIRECTIONS.some(d => d.id === start) ? start : null);
   if (preType){ state.type = preType; renderChips($("type"), TYPES, "type"); }
@@ -1194,7 +1201,6 @@
   function openSheet(){
     if (!validate()) return;
     const p = payload();
-    const bytes = new TextEncoder().encode(JSON.stringify(p)).length;
     let tags = [], title = "", lead = "", rows = [];
     const salon = nameOf(SALONS, p.salon);
     const chan = nameOf(TYPES, p.type), dirName = nameOf(DIRECTIONS, p.dir);
@@ -1246,6 +1252,7 @@
     }
     rows = rows.filter(r => r[1]);
     lastCard = {urgent: p.dl === "urgent", tags: tags.filter(Boolean), title, lead, rows};
+    const bytes = new TextEncoder().encode(JSON.stringify(botMessage(p, lastCard))).length;
     $("ticket").innerHTML =
       `<div class="tags">${p.dl === "urgent" ? '<span class="tag hot">срочно</span>' : ""}${tags.filter(Boolean).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
        <p class="ticket-title">${esc(title)}</p>
@@ -1275,30 +1282,14 @@
     $("done-text").textContent = `Задача появится в топике «${topicOf(p)}». Когда дизайнер её возьмёт, бот отметит тебя там. Файлы и голосовые присылай ответом на карточку задачи.`;
     $("done").classList.add("show");
   }
-  let sending = false;
-  $("send").onclick = async () => {
+  $("send").onclick = () => {
     const p = payload();
     if (inTelegram){
-      const api = API_URL();
-      if (!api){ toast("Не нашла адрес бота. Открой форму кнопкой «Новая задача» в топике"); return; }
-      if (sending) return; sending = true; $("send").textContent = "Отправляю…";
-      try{
-        const r = await fetch(api + "/task", {method:"POST", headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({initData: tg.initData, payload: p, card: lastCard})});
-        const j = await r.json().catch(() => ({}));
-        if (!r.ok || !j.ok) throw new Error(j.error || ("HTTP " + r.status));
-        try{ tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("success"); }catch(e){}
-        showDone(p);
-        if (j.topic) $("done-text").textContent = `Задача #${j.num} появится в топике «${j.topic}». Когда дизайнер её возьмёт, бот отметит тебя там. Файлы и голосовые присылай ответом на карточку задачи.`;
-      }catch(e){
-        try{ tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("error"); }catch(_){}
-        toast("Не получилось отправить: бот сейчас не отвечает. Попробуй ещё раз через минуту");
-      }finally{ sending = false; $("send").textContent = "Отправить дизайнеру"; }
+      try{ tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("success"); }catch(e){}
+      tg.sendData(JSON.stringify(botMessage(p, lastCard)));   // форма закроется, бот пришлёт номер задачи в чат
     } else {
-      closeSheet(); console.log("TEZI task payload:", data);
-      const p = payload();
-      $("done-text").textContent = `Задача появится в топике «${topicOf(p)}». Когда дизайнер её возьмёт, бот отметит тебя там. Файлы и голосовые присылай ответом на карточку задачи.`;
-      $("done").classList.add("show");
+      console.log("TEZI task message:", JSON.stringify(botMessage(p, lastCard)));
+      showDone(p);
     }
   };
 
